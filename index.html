@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exploradores de la Robótica</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        
+        body {
+            font-family: 'Plus+Jakarta+Sans', sans-serif;
+            background-color: #f0f4f8;
+            overflow-x: hidden;
+        }
+
+        .slide-enter {
+            animation: slideIn 0.5s ease-out forwards;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-hover:hover {
+            transform: scale(1.02);
+            transition: all 0.3s ease;
+        }
+
+        .bg-robot-blue { background-color: #3b82f6; }
+        .text-robot-blue { color: #3b82f6; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div id="app" class="min-h-screen flex flex-col">
+        <!-- Navigation Bar -->
+        <nav class="bg-white shadow-sm p-4 sticky top-0 z-50">
+            <div class="max-w-5xl mx-auto flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="bot" class="text-robot-blue w-8 h-8"></i>
+                    <span class="font-bold text-xl tracking-tight">RoboClase 6º</span>
+                </div>
+                <div class="hidden md:flex gap-4" id="nav-links">
+                    <!-- Dynamic nav links -->
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="flex-grow flex items-center justify-center p-4 md:p-8">
+            <div id="content-container" class="max-w-4xl w-full bg-white rounded-3xl shadow-xl overflow-hidden min-h-[500px] flex flex-col slide-enter">
+                <!-- Content will be injected here -->
+            </div>
+        </main>
+
+        <!-- Controls -->
+        <div class="p-6 max-w-4xl mx-auto w-full flex justify-between items-center">
+            <button id="prev-btn" class="flex items-center gap-2 px-6 py-3 bg-white border-2 border-slate-200 rounded-full font-semibold hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed">
+                <i data-lucide="arrow-left"></i> Anterior
+            </button>
+            <div id="progress-dots" class="flex gap-2"></div>
+            <button id="next-btn" class="flex items-center gap-2 px-6 py-3 bg-robot-blue text-white rounded-full font-semibold hover:bg-blue-600 shadow-lg shadow-blue-200 disabled:opacity-30">
+                Siguiente <i data-lucide="arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const slides = [
+            {
+                id: 'inicio',
+                title: '¡Bienvenidos al Mundo de la Robótica!',
+                subtitle: 'Hoy vamos a aprender cómo "piensan" y "sienten" las máquinas.',
+                icon: 'rocket',
+                color: 'bg-blue-500',
+                content: `
+                    <div class="text-center p-8">
+                        <div class="mb-6 inline-block p-4 bg-blue-100 rounded-full">
+                            <i data-lucide="bot" class="w-16 h-16 text-blue-600"></i>
+                        </div>
+                        <p class="text-lg text-slate-600 max-w-md mx-auto mb-8">
+                            Imagina que vamos a crear un pequeño ser electrónico. Para que funcione, necesita un cerebro, sentidos y músculos.
+                        </p>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="p-4 bg-blue-50 rounded-xl"><i data-lucide="brain" class="mx-auto mb-2 text-blue-500"></i> Cerebro</div>
+                            <div class="p-4 bg-green-50 rounded-xl"><i data-lucide="eye" class="mx-auto mb-2 text-green-500"></i> Sentidos</div>
+                            <div class="p-4 bg-red-50 rounded-xl"><i data-lucide="zap" class="mx-auto mb-2 text-red-500"></i> Músculos</div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'arduino',
+                title: 'El Cerebro: Arduino',
+                subtitle: 'La placa azul que lo controla todo.',
+                icon: 'cpu',
+                color: 'bg-blue-600',
+                content: `
+                    <div class="p-8 flex flex-col md:flex-row gap-8 items-center">
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold mb-4 text-blue-700">¿Qué es?</h3>
+                            <p class="text-slate-600 mb-4">Arduino es un cerebro electrónico valiente. No sabe qué hacer solo, espera tus órdenes.</p>
+                            <div class="bg-blue-50 p-4 rounded-xl border-l-4 border-blue-500">
+                                <strong>Uso principal:</strong> Controlar desde un semáforo hasta un robot que esquiva obstáculos.
+                            </div>
+                        </div>
+                        <div class="flex-1 bg-slate-100 rounded-2xl p-6 text-center border-dashed border-2 border-slate-300">
+                            <i data-lucide="microchip" class="w-32 h-32 mx-auto text-blue-600 mb-2"></i>
+                            <p class="text-xs text-slate-400">Representación del Microcontrolador</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'sensores',
+                title: 'Los Sentidos: Sensores',
+                subtitle: '¿Cómo conoce el robot el mundo exterior?',
+                icon: 'eye',
+                color: 'bg-green-500',
+                content: `
+                    <div class="p-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="p-6 bg-green-50 rounded-2xl card-hover">
+                            <i data-lucide="waves" class="text-green-600 mb-3"></i>
+                            <h4 class="font-bold mb-2">Ultrasonido</h4>
+                            <p class="text-sm text-slate-600">Como el oído de un murciélago: detecta distancias.</p>
+                        </div>
+                        <div class="p-6 bg-yellow-50 rounded-2xl card-hover">
+                            <i data-lucide="sun" class="text-yellow-600 mb-3"></i>
+                            <h4 class="font-bold mb-2">Luz (LDR)</h4>
+                            <p class="text-sm text-slate-600">Son los ojos: sabe si es de día o de noche.</p>
+                        </div>
+                        <div class="p-6 bg-orange-50 rounded-2xl card-hover">
+                            <i data-lucide="mouse-pointer-2" class="text-orange-600 mb-3"></i>
+                            <h4 class="font-bold mb-2">Pulsador</h4>
+                            <p class="text-sm text-slate-600">El tacto: sabe si alguien presionó un botón.</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'actuadores',
+                title: 'Los Músculos: Actuadores',
+                subtitle: 'Las partes que realizan las acciones físicas.',
+                icon: 'zap',
+                color: 'bg-red-500',
+                content: `
+                    <div class="p-8 space-y-4">
+                        <div class="flex items-center gap-4 p-4 bg-red-50 rounded-xl">
+                            <div class="p-3 bg-white rounded-lg"><i data-lucide="lightbulb" class="text-yellow-500"></i></div>
+                            <div><h4 class="font-bold">LEDs</h4><p class="text-sm">Pequeñas luces para "hablar" o avisar.</p></div>
+                        </div>
+                        <div class="flex items-center gap-4 p-4 bg-orange-50 rounded-xl">
+                            <div class="p-3 bg-white rounded-lg"><i data-lucide="settings" class="text-slate-600"></i></div>
+                            <div><h4 class="font-bold">Motores</h4><p class="text-sm">Permiten que el robot se mueva o gire.</p></div>
+                        </div>
+                        <div class="flex items-center gap-4 p-4 bg-purple-50 rounded-xl">
+                            <div class="p-3 bg-white rounded-lg"><i data-lucide="volume-2" class="text-purple-600"></i></div>
+                            <div><h4 class="font-bold">Buzzer</h4><p class="text-sm">La voz del robot para hacer sonidos y música.</p></div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'logica',
+                title: 'Fundamentos de Programación',
+                subtitle: 'Las reglas del juego para nuestro robot.',
+                icon: 'file-text',
+                color: 'bg-purple-600',
+                content: `
+                    <div class="p-8 flex flex-col md:flex-row gap-6">
+                        <div class="flex-1 bg-purple-50 p-6 rounded-2xl border-2 border-purple-100">
+                            <h4 class="font-bold text-purple-700 mb-3 flex items-center gap-2">
+                                <i data-lucide="utensils" class="w-5 h-5"></i> Como una Receta
+                            </h4>
+                            <p class="text-sm text-slate-600 italic mb-4">"Si el sensor ve una pared, entonces gira a la izquierda"</p>
+                            <ul class="space-y-2 text-sm">
+                                <li class="flex gap-2"><strong>Variables:</strong> Cajas de datos.</li>
+                                <li class="flex gap-2"><strong>Condicionales:</strong> Tomar decisiones.</li>
+                                <li class="flex gap-2"><strong>Bucles:</strong> Repetir acciones.</li>
+                            </ul>
+                        </div>
+                        <div class="flex-1 flex items-center justify-center">
+                            <i data-lucide="scroll-text" class="w-24 h-24 text-purple-200"></i>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'codigo',
+                title: 'Programación por Código',
+                subtitle: 'El lenguaje secreto (C++) para hablar con Arduino.',
+                icon: 'code',
+                color: 'bg-slate-800',
+                content: `
+                    <div class="p-8">
+                        <p class="mb-4 text-slate-600">Pasamos de dibujar con crayones a escribir un libro poderoso.</p>
+                        <div class="bg-slate-900 rounded-xl p-6 font-mono text-sm text-green-400 shadow-inner">
+                            <p class="text-slate-500">// Configuración</p>
+                            <p><span class="text-pink-400">void</span> setup() {</p>
+                            <p class="pl-4">pinMode(<span class="text-orange-300">13</span>, <span class="text-blue-400">OUTPUT</span>);</p>
+                            <p>}</p>
+                            <br>
+                            <p class="text-slate-500">// El ciclo infinito</p>
+                            <p><span class="text-pink-400">void</span> loop() {</p>
+                            <p class="pl-4">digitalWrite(<span class="text-orange-300">13</span>, <span class="text-blue-400">HIGH</span>);</p>
+                            <p>}</p>
+                        </div>
+                    </div>
+                `
+            }
+        ];
+
+        let currentSlide = 0;
+
+        function renderSlide() {
+            const slide = slides[currentSlide];
+            const container = document.getElementById('content-container');
+            
+            // Apply enter animation
+            container.classList.remove('slide-enter');
+            void container.offsetWidth; // trigger reflow
+            container.classList.add('slide-enter');
+
+            container.innerHTML = `
+                <div class="h-2 w-full ${slide.color}"></div>
+                <div class="p-8 border-b flex justify-between items-start">
+                    <div>
+                        <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2 ${slide.color} text-white">
+                            Lección ${currentSlide + 1}
+                        </span>
+                        <h2 class="text-3xl font-extrabold text-slate-900">${slide.title}</h2>
+                        <p class="text-slate-500">${slide.subtitle}</p>
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-2xl">
+                        <i data-lucide="${slide.icon}" class="w-8 h-8 text-slate-400"></i>
+                    </div>
+                </div>
+                <div class="flex-grow">
+                    ${slide.content}
+                </div>
+                <div class="p-4 bg-slate-50 text-center text-xs text-slate-400">
+                    © 2026 Guía de Robótica para 6º Grado
+                </div>
+            `;
+
+            // Update nav indicators
+            renderDots();
+            updateButtons();
+            lucide.createIcons();
+        }
+
+        function renderDots() {
+            const dotsContainer = document.getElementById('progress-dots');
+            dotsContainer.innerHTML = slides.map((_, index) => `
+                <div class="h-2 w-2 rounded-full transition-all duration-300 ${index === currentSlide ? 'w-8 bg-robot-blue' : 'bg-slate-200'}"></div>
+            `).join('');
+        }
+
+        function updateButtons() {
+            document.getElementById('prev-btn').disabled = currentSlide === 0;
+            document.getElementById('next-btn').disabled = currentSlide === slides.length - 1;
+            
+            if (currentSlide === slides.length - 1) {
+                document.getElementById('next-btn').innerHTML = 'Terminar <i data-lucide="check"></i>';
+            } else {
+                document.getElementById('next-btn').innerHTML = 'Siguiente <i data-lucide="arrow-right"></i>';
+            }
+            lucide.createIcons();
+        }
+
+        document.getElementById('next-btn').addEventListener('click', () => {
+            if (currentSlide < slides.length - 1) {
+                currentSlide++;
+                renderSlide();
+            }
+        });
+
+        document.getElementById('prev-btn').addEventListener('click', () => {
+            if (currentSlide > 0) {
+                currentSlide--;
+                renderSlide();
+            }
+        });
+
+        // Initialize
+        window.onload = () => {
+            renderSlide();
+        };
+    </script>
+</body>
+</html>
