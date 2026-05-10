@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exploradores de la Robótica</title>
+    <link rel="icon" type="image/png" href="roboclass.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        
+        body {
+            font-family: 'Plus+Jakarta+Sans', sans-serif;
+            background-color: #f0f4f8;
+            overflow-x: hidden;
+        }
+
+        /* --- Animaciones Generales --- */
+        .slide-enter { animation: slideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .card-hover:hover {
+            transform: translateY(-5px) scale(1.02);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* --- Animaciones de Actuadores --- */
+        .hover-spin:hover i { animation: spin 2s linear infinite; }
+        .hover-glow:hover i { filter: drop-shadow(0 0 8px #eab308); color: #eab308; }
+        .hover-shake:hover i { animation: shake 0.5s infinite; }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-3px) rotate(-5deg); }
+            75% { transform: translateX(3px) rotate(5deg); }
+        }
+
+        /* --- Animaciones del Test --- */
+        .shake-error { animation: shake-error-anim 0.4s ease-in-out; }
+        @keyframes shake-error-anim {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+
+        /* --- Efectos Especiales --- */
+        .pulse-brain { animation: pulse-soft 2s infinite; }
+        @keyframes pulse-soft {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+        }
+
+        /* --- Clases Utilitarias --- */
+        .bg-robot-blue { background-color: #3b82f6; }
+        .text-robot-blue { color: #3b82f6; }
+        .oculto { display: none !important; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div id="app" class="min-h-screen flex flex-col">
+        <nav class="bg-white shadow-sm p-4 sticky top-0 z-50">
+            <div class="max-w-5xl mx-auto flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="bg-blue-100 p-2 rounded-xl">
+                        <i data-lucide="bot" class="text-robot-blue w-8 h-8"></i>
+                    </div>
+                    <span class="font-bold text-2xl tracking-tight text-slate-800">RoboClase <span class="text-robot-blue">6º</span></span>
+                </div>
+                <div class="text-sm font-bold text-slate-400 bg-slate-100 px-4 py-2 rounded-full" id="contador-slides">
+                    1 / 7
+                </div>
+            </div>
+        </nav>
+
+        <main class="flex-grow flex items-center justify-center p-4 md:p-8">
+            <div id="contenedor-contenido" class="max-w-4xl w-full bg-white rounded-3xl shadow-xl overflow-hidden min-h-[500px] flex flex-col slide-enter border border-slate-100">
+                </div>
+        </main>
+
+        <div class="p-6 max-w-4xl mx-auto w-full flex flex-col sm:flex-row justify-between items-center gap-4">
+            <button id="btn-atras" class="w-full sm:w-auto flex justify-center items-center gap-2 px-6 py-3 bg-white border-2 border-slate-200 text-slate-600 rounded-full font-bold hover:bg-slate-50 hover:border-slate-300 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+                <i data-lucide="arrow-left"></i> Atrás
+            </button>
+            <div id="puntos-progreso" class="flex gap-2 hidden sm:flex"></div>
+            <button id="btn-avanzar" class="w-full sm:w-auto flex justify-center items-center gap-2 px-8 py-3 bg-robot-blue text-white rounded-full font-bold hover:bg-blue-600 shadow-lg shadow-blue-300 hover:shadow-blue-400 transition-all transform hover:-translate-y-0.5 disabled:opacity-30">
+                ¡Avanzar! <i data-lucide="arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // =====================================================================
+        // 1. ESTADO DE LA APLICACIÓN
+        // =====================================================================
+        const estado = {
+            slideActual: 0,
+            codigoTraducido: false
+        };
+
+        // =====================================================================
+        // 2. BASE DE DATOS DE CONTENIDO
+        // =====================================================================
+        const diapositivas = [
+            {
+                id: 'inicio',
+                titulo: '¡Despierta a la Máquina!',
+                subtitulo: 'Hoy vamos a aprender el secreto de cómo "piensan" los robots.',
+                icono: 'rocket',
+                color: 'bg-blue-500',
+                contenido: `
+                    <div class="text-center p-8">
+                        <div class="mb-6 inline-block p-6 bg-blue-100 rounded-full pulse-brain border-4 border-blue-200">
+                            <i data-lucide="bot" class="w-20 h-20 text-blue-600"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-700 mb-4">Imagina que un robot es como tú...</h3>
+                        <p class="text-lg text-slate-600 max-w-lg mx-auto mb-8 leading-relaxed">
+                            Para jugar, correr o esquivar cosas, necesitas <span class="font-bold text-blue-500">pensar</span>, necesitas tus <span class="font-bold text-green-500">sentidos</span> y necesitas tus <span class="font-bold text-red-500">músculos</span>. ¡Los robots funcionan exactamente igual!
+                        </p>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="p-6 bg-blue-50 rounded-2xl border border-blue-100 card-hover cursor-default">
+                                <i data-lucide="brain" class="w-10 h-10 mx-auto mb-3 text-blue-500"></i> 
+                                <span class="font-bold text-blue-700">El Cerebro</span>
+                            </div>
+                            <div class="p-6 bg-green-50 rounded-2xl border border-green-100 card-hover cursor-default">
+                                <i data-lucide="eye" class="w-10 h-10 mx-auto mb-3 text-green-500"></i> 
+                                <span class="font-bold text-green-700">Los Sentidos</span>
+                            </div>
+                            <div class="p-6 bg-red-50 rounded-2xl border border-red-100 card-hover cursor-default">
+                                <i data-lucide="zap" class="w-10 h-10 mx-auto mb-3 text-red-500"></i> 
+                                <span class="font-bold text-red-700">Los Músculos</span>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'arduino',
+                titulo: 'El Cerebro: Arduino',
+                subtitulo: 'El director de orquesta que da las órdenes.',
+                icono: 'cpu',
+                color: 'bg-indigo-600',
+                contenido: `
+                    <div class="p-8 flex flex-col md:flex-row gap-8 items-center">
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold mb-4 text-indigo-700">La Placa Mágica</h3>
+                            <p class="text-slate-600 mb-4 text-lg">Arduino es una pequeña computadora azul. Pero tiene un problema: <strong>¡Es súper obediente, pero no sabe qué hacer por sí solo!</strong></p>
+                            <p class="text-slate-600 mb-6">Necesita que <em>tú</em> le escribas las instrucciones. Él recibe la información, la piensa súper rápido, y da órdenes.</p>
+                            
+                            <button id="btn-revelar-arduino" class="px-6 py-2 bg-indigo-100 text-indigo-700 font-bold rounded-lg hover:bg-indigo-200 transition-colors">
+                                <i data-lucide="search" class="inline w-5 h-5 mr-1"></i> ¿Qué puede controlar?
+                            </button>
+                            
+                            <div id="secreto-arduino" class="oculto mt-4 bg-indigo-50 p-5 rounded-xl border-l-4 border-indigo-500">
+                                <ul class="space-y-2 text-indigo-800 font-medium">
+                                    <li>🚦 Semáforos inteligentes</li>
+                                    <li>🤖 Brazos robóticos</li>
+                                    <li>🚗 Carritos que esquivan paredes</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="flex-1 bg-slate-900 rounded-2xl p-8 text-center relative overflow-hidden group">
+                            <div class="absolute inset-0 bg-indigo-500 opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                            <i data-lucide="microchip" class="w-40 h-40 mx-auto text-indigo-400 mb-4 pulse-brain relative z-10"></i>
+                            <p class="text-sm text-indigo-200 relative z-10 font-mono">ARDUINO UNO R3</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'sensores',
+                titulo: 'Los Sentidos: Sensores',
+                subtitulo: 'Así es como el robot siente el mundo.',
+                icono: 'eye',
+                color: 'bg-green-500',
+                contenido: `
+                    <div class="p-8">
+                        <p class="text-center text-slate-600 mb-8 text-lg">Si le tapamos los ojos y los oídos al robot, chocará. Los sensores recogen información de afuera y se la envían al cerebro (Arduino).</p>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="p-6 bg-white border-2 border-green-100 rounded-2xl card-hover relative overflow-hidden group cursor-pointer">
+                                <div class="absolute top-0 left-0 w-full h-2 bg-emerald-400"></div>
+                                <i data-lucide="waves" class="w-12 h-12 text-emerald-500 mb-4 group-hover:scale-110 transition-transform"></i>
+                                <h4 class="font-bold text-xl mb-2 text-slate-800">Ultrasonido</h4>
+                                <p class="text-slate-600">Es como el súper-oído de un murciélago. Lanza un sonido invisible que rebota y le dice a qué distancia hay una pared.</p>
+                            </div>
+                            <div class="p-6 bg-white border-2 border-yellow-100 rounded-2xl card-hover relative overflow-hidden group cursor-pointer">
+                                <div class="absolute top-0 left-0 w-full h-2 bg-yellow-400"></div>
+                                <i data-lucide="sun" class="w-12 h-12 text-yellow-500 mb-4 group-hover:scale-110 transition-transform"></i>
+                                <h4 class="font-bold text-xl mb-2 text-slate-800">Sensor de Luz (LDR)</h4>
+                                <p class="text-slate-600">Son los ojos del robot. Detecta si estás en una habitación oscura o si le está dando el sol directamente.</p>
+                            </div>
+                            <div class="p-6 bg-white border-2 border-orange-100 rounded-2xl card-hover relative overflow-hidden group cursor-pointer">
+                                <div class="absolute top-0 left-0 w-full h-2 bg-orange-400"></div>
+                                <i data-lucide="mouse-pointer-2" class="w-12 h-12 text-orange-500 mb-4 group-hover:scale-110 transition-transform"></i>
+                                <h4 class="font-bold text-xl mb-2 text-slate-800">Pulsador</h4>
+                                <p class="text-slate-600">Es su sentido del tacto. Funciona como el botón de un control de videojuegos: sabe exactamente cuándo lo presionas.</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'actuadores',
+                titulo: 'Los Músculos: Actuadores',
+                subtitulo: '¡Pasa el ratón por encima para activarlos!',
+                icono: 'zap',
+                color: 'bg-red-500',
+                contenido: `
+                    <div class="p-8 space-y-4">
+                        <p class="text-slate-600 mb-6 text-lg">Una vez que el Arduino "piensa", necesita usar sus músculos para hacer algo. A estas piezas las llamamos actuadores.</p>
+                        
+                        <div class="flex items-center gap-6 p-5 bg-white border-2 border-slate-100 rounded-2xl hover-glow cursor-pointer transition-all duration-300">
+                            <div class="p-4 bg-slate-50 rounded-xl transition-all duration-300"><i data-lucide="lightbulb" class="w-10 h-10 text-slate-400 transition-colors duration-300"></i></div>
+                            <div>
+                                <h4 class="font-bold text-xl text-slate-800">LEDs</h4>
+                                <p class="text-slate-600">Son los gestos del robot. Las usa para "hablar", avisar si hay un error, o simplemente encender los faros de un carro.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-6 p-5 bg-white border-2 border-slate-100 rounded-2xl hover-spin cursor-pointer transition-all duration-300">
+                            <div class="p-4 bg-slate-50 rounded-xl"><i data-lucide="settings" class="w-10 h-10 text-blue-500"></i></div>
+                            <div>
+                                <h4 class="font-bold text-xl text-slate-800">Servomotores</h4>
+                                <p class="text-slate-600">Son los músculos reales. Gracias a ellos, el robot puede mover sus llantas, girar una cámara o abrir una compuerta.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-6 p-5 bg-white border-2 border-slate-100 rounded-2xl hover-shake cursor-pointer transition-all duration-300">
+                            <div class="p-4 bg-slate-50 rounded-xl"><i data-lucide="volume-2" class="w-10 h-10 text-purple-500"></i></div>
+                            <div>
+                                <h4 class="font-bold text-xl text-slate-800">Buzzer (Zumbador)</h4>
+                                <p class="text-slate-600">Las cuerdas vocales. Emite pitidos, alarmas o hasta pequeñas melodías tipo Mario Bros.</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'logica',
+                titulo: 'Lógica: Las Reglas del Juego',
+                subtitulo: 'Cómo le explicamos al robot lo que queremos.',
+                icono: 'file-text',
+                color: 'bg-purple-600',
+                contenido: `
+                    <div class="p-8 flex flex-col md:flex-row gap-8">
+                        <div class="flex-1">
+                            <p class="text-lg text-slate-600 mb-6">Programar no es magia, es dar instrucciones paso a paso, como una <strong>receta de cocina</strong> súper detallada.</p>
+                            
+                            <div class="space-y-4">
+                                <div class="bg-purple-50 p-4 rounded-xl border-l-4 border-purple-400">
+                                    <h4 class="font-bold text-purple-800 flex items-center gap-2"><i data-lucide="box" class="w-5 h-5"></i> 1. Variables</h4>
+                                    <p class="text-sm text-purple-600 mt-1">Son "cajas" con etiquetas. Ej: Una caja llamada 'Velocidad' donde guardamos el número 100.</p>
+                                </div>
+                                <div class="bg-pink-50 p-4 rounded-xl border-l-4 border-pink-400">
+                                    <h4 class="font-bold text-pink-800 flex items-center gap-2"><i data-lucide="split" class="w-5 h-5"></i> 2. Condicionales</h4>
+                                    <p class="text-sm text-pink-600 mt-1">Son los caminos. <em>"<strong>SI</strong> el sensor ve una pared, <strong>ENTONCES</strong> frena."</em></p>
+                                </div>
+                                <div class="bg-blue-50 p-4 rounded-xl border-l-4 border-blue-400">
+                                    <h4 class="font-bold text-blue-800 flex items-center gap-2"><i data-lucide="rotate-cw" class="w-5 h-5"></i> 3. Bucles</h4>
+                                    <p class="text-sm text-blue-600 mt-1">Hacer algo muchas veces. <em>"Parpadea la luz ROJA infinitamente hasta que yo te diga."</em></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex-1 flex flex-col items-center justify-center bg-slate-100 rounded-2xl p-6 border-dashed border-4 border-slate-200">
+                            <i data-lucide="gamepad-2" class="w-24 h-24 text-purple-300 mb-4"></i>
+                            <p class="text-center text-slate-500 font-bold">¡Es como poner reglas en un videojuego!</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'codigo',
+                titulo: 'El Idioma Secreto: C++',
+                subtitulo: '¡Vamos a hackear al Arduino!',
+                icono: 'code',
+                color: 'bg-slate-800',
+                contenido: `
+                    <div class="p-8">
+                        <div class="flex justify-between items-center mb-4">
+                            <p class="text-slate-600 text-lg">Este es el idioma que lee Arduino. Parece difícil, pero lo vamos a traducir.</p>
+                            <button id="btn-traducir" class="px-4 py-2 bg-emerald-500 text-white font-bold rounded-lg hover:bg-emerald-600 flex items-center gap-2 transition-colors">
+                                <i data-lucide="languages" class="w-5 h-5"></i> <span>Traducir a Humano</span>
+                            </button>
+                        </div>
+                        
+                        <div class="bg-slate-900 rounded-2xl p-6 font-mono text-sm text-slate-300 shadow-inner relative overflow-hidden">
+                            <div class="absolute top-0 left-0 w-2 h-full bg-slate-700"></div>
+                            
+                            <div id="codigo-real" class="space-y-2 ml-4">
+                                <p><span class="text-slate-500 italic">// Configuración inicial (Solo se lee una vez)</span></p>
+                                <p><span class="text-pink-400">void</span> <span class="text-green-300">setup</span>() {</p>
+                                <p class="pl-6"><span class="text-blue-300">pinMode</span>(<span class="text-orange-300">13</span>, <span class="text-blue-400">OUTPUT</span>);</p>
+                                <p>}</p>
+                                <br>
+                                <p><span class="text-slate-500 italic">// El ciclo infinito (Se repite para siempre)</span></p>
+                                <p><span class="text-pink-400">void</span> <span class="text-green-300">loop</span>() {</p>
+                                <p class="pl-6"><span class="text-blue-300">digitalWrite</span>(<span class="text-orange-300">13</span>, <span class="text-blue-400">HIGH</span>);</p>
+                                <p>}</p>
+                            </div>
+
+                            <div id="codigo-humano" class="space-y-2 ml-4 oculto text-emerald-300 font-bold">
+                                <p><span class="text-emerald-500 italic">Prepara las cosas (Esto se hace 1 vez al prenderlo)</span></p>
+                                <p>Preparar() {</p>
+                                <p class="pl-6">Configura el enchufe número 13 para enviar energía Hacia Afuera.</p>
+                                <p>}</p>
+                                <br>
+                                <p><span class="text-emerald-500 italic">La acción (Repite esto sin parar)</span></p>
+                                <p>Accion_Infinita() {</p>
+                                <p class="pl-6">Envíale energía (ENCIENDE) al enchufe número 13.</p>
+                                <p>}</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'reto',
+                titulo: '¡Mini Reto Final!',
+                subtitulo: 'Demuestra que ya eres un Explorador de Robótica.',
+                icono: 'trophy',
+                color: 'bg-yellow-500',
+                contenido: `
+                    <div class="p-4 md:p-8 text-center max-h-[600px] overflow-y-auto">
+                        <i data-lucide="medal" class="w-16 h-16 text-yellow-500 mx-auto mb-4 pulse-brain"></i>
+                        <h3 class="text-xl md:text-2xl font-bold text-slate-800 mb-6">¿Qué pieza usarías si quieres que el robot...</h3>
+                        
+                        <div class="space-y-4 max-w-2xl mx-auto text-left pb-4">
+                            
+                            <div class="p-4 md:p-5 border-2 border-slate-200 rounded-xl bg-white shadow-sm transition-all hover:border-slate-300">
+                                <p class="font-bold text-slate-700 mb-4 flex items-center gap-3">
+                                    <span class="bg-yellow-100 text-yellow-700 w-8 h-8 flex items-center justify-center rounded-full text-sm shrink-0">1</span> 
+                                    ...encienda una luz para avisar que está encendido?
+                                </p>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 contenedor-opciones">
+                                    <button class="opcion-test p-3 bg-slate-50 border border-slate-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors font-medium text-slate-600 flex flex-col items-center justify-center gap-2" data-correcta="true" data-explicacion="¡Correcto! El LED es el actuador que emite luz."><i data-lucide="lightbulb" class="w-6 h-6"></i> LED</button>
+                                    <button class="opcion-test p-3 bg-slate-50 border border-slate-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors font-medium text-slate-600 flex flex-col items-center justify-center gap-2" data-correcta="false"><i data-lucide="cpu" class="w-6 h-6"></i> Arduino</button>
+                                    <button class="opcion-test p-3 bg-slate-50 border border-slate-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors font-medium text-slate-600 flex flex-col items-center justify-center gap-2" data-correcta="false"><i data-lucide="waves" class="w-6 h-6"></i> Ultrasonido</button>
+                                </div>
+                                <div class="feedback-test oculto mt-3 text-sm font-bold p-3 rounded-lg"></div>
+                            </div>
+
+                            <div class="p-4 md:p-5 border-2 border-slate-200 rounded-xl bg-white shadow-sm transition-all hover:border-slate-300">
+                                <p class="font-bold text-slate-700 mb-4 flex items-center gap-3">
+                                    <span class="bg-yellow-100 text-yellow-700 w-8 h-8 flex items-center justify-center rounded-full text-sm shrink-0">2</span> 
+                                    ...sepa que hay una pared enfrente para no chocar?
+                                </p>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 contenedor-opciones">
+                                    <button class="opcion-test p-3 bg-slate-50 border border-slate-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors font-medium text-slate-600 flex flex-col items-center justify-center gap-2" data-correcta="false"><i data-lucide="volume-2" class="w-6 h-6"></i> Buzzer</button>
+                                    <button class="opcion-test p-3 bg-slate-50 border border-slate-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors font-medium text-slate-600 flex flex-col items-center justify-center gap-2" data-correcta="true" data-explicacion="¡Excelente! El Ultrasonido es el sensor que detecta distancias."><i data-lucide="waves" class="w-6 h-6"></i> Ultrasonido</button>
+                                    <button class="opcion-test p-3 bg-slate-50 border border-slate-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors font-medium text-slate-600 flex flex-col items-center justify-center gap-2" data-correcta="false"><i data-lucide="settings" class="w-6 h-6"></i> Servomotor</button>
+                                </div>
+                                <div class="feedback-test oculto mt-3 text-sm font-bold p-3 rounded-lg"></div>
+                            </div>
+
+                            <div class="p-4 md:p-5 border-2 border-slate-200 rounded-xl bg-white shadow-sm transition-all hover:border-slate-300">
+                                <p class="font-bold text-slate-700 mb-4 flex items-center gap-3">
+                                    <span class="bg-yellow-100 text-yellow-700 w-8 h-8 flex items-center justify-center rounded-full text-sm shrink-0">3</span> 
+                                    ...procese la información de los sensores y dé órdenes?
+                                </p>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 contenedor-opciones">
+                                    <button class="opcion-test p-3 bg-slate-50 border border-slate-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors font-medium text-slate-600 flex flex-col items-center justify-center gap-2" data-correcta="false"><i data-lucide="mouse-pointer-2" class="w-6 h-6"></i> Pulsador</button>
+                                    <button class="opcion-test p-3 bg-slate-50 border border-slate-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors font-medium text-slate-600 flex flex-col items-center justify-center gap-2" data-correcta="false"><i data-lucide="sun" class="w-6 h-6"></i> Sensor de Luz</button>
+                                    <button class="opcion-test p-3 bg-slate-50 border border-slate-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors font-medium text-slate-600 flex flex-col items-center justify-center gap-2" data-correcta="true" data-explicacion="¡Magia pura! Arduino es el cerebro que dirige todo."><i data-lucide="cpu" class="w-6 h-6"></i> Arduino</button>
+                                </div>
+                                <div class="feedback-test oculto mt-3 text-sm font-bold p-3 rounded-lg"></div>
+                            </div>
+
+                        </div>
+                    </div>
+                `
+            }
+        ];
+
+        // =====================================================================
+        // 3. RENDERIZADO E INTERFAZ (UI)
+        // =====================================================================
+        
+        function renderizarSlide() {
+            const slide = diapositivas[estado.slideActual];
+            const contenedor = document.getElementById('contenedor-contenido');
+            
+            document.getElementById('contador-slides').innerText = `${estado.slideActual + 1} / ${diapositivas.length}`;
+
+            // Reiniciar animación del slide
+            contenedor.classList.remove('slide-enter');
+            void contenedor.offsetWidth; // Forzar repintado del DOM para reiniciar animación
+            contenedor.classList.add('slide-enter');
+
+            // Inyectar HTML
+            contenedor.innerHTML = `
+                <div class="h-3 w-full ${slide.color}"></div>
+                <div class="p-6 md:p-8 border-b border-slate-100 flex justify-between items-start">
+                    <div>
+                        <span class="inline-block px-4 py-1 rounded-full text-xs font-bold tracking-widest mb-3 ${slide.color} text-white shadow-sm">
+                            PASO ${estado.slideActual + 1}
+                        </span>
+                        <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-2">${slide.titulo}</h2>
+                        <p class="text-slate-500 text-lg font-medium">${slide.subtitulo}</p>
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 shadow-sm hidden md:block">
+                        <i data-lucide="${slide.icono}" class="w-10 h-10 text-slate-400"></i>
+                    </div>
+                </div>
+                <div class="flex-grow flex flex-col justify-center">
+                    ${slide.contenido}
+                </div>
+            `;
+
+            // Reseteamos el estado de traducción visual si cambiamos de slide
+            estado.codigoTraducido = false;
+
+            renderizarPuntosProgreso();
+            actualizarBotonesNavegacion();
+            lucide.createIcons(); // Recargar iconos de Lucide
+        }
+
+        function renderizarPuntosProgreso() {
+            const contenedor = document.getElementById('puntos-progreso');
+            contenedor.innerHTML = diapositivas.map((_, index) => `
+                <div class="h-2.5 rounded-full transition-all duration-500 ${index === estado.slideActual ? 'w-10 bg-robot-blue shadow-sm' : 'w-2.5 bg-slate-200'}"></div>
+            `).join('');
+        }
+
+        function actualizarBotonesNavegacion() {
+            const btnPrev = document.getElementById('btn-atras');
+            const btnSig = document.getElementById('btn-avanzar');
+            
+            btnPrev.disabled = estado.slideActual === 0;
+            
+            if (estado.slideActual === diapositivas.length - 1) {
+                btnSig.innerHTML = '¡Reiniciar Misión! <i data-lucide="rotate-ccw"></i>';
+                btnSig.className = "w-full sm:w-auto flex justify-center items-center gap-2 px-8 py-3 bg-yellow-500 text-white rounded-full font-bold hover:bg-yellow-600 shadow-lg shadow-yellow-300 hover:shadow-yellow-400 transition-all transform hover:-translate-y-0.5";
+            } else {
+                btnSig.innerHTML = '¡Avanzar! <i data-lucide="arrow-right"></i>';
+                btnSig.className = "w-full sm:w-auto flex justify-center items-center gap-2 px-8 py-3 bg-robot-blue text-white rounded-full font-bold hover:bg-blue-600 shadow-lg shadow-blue-300 hover:shadow-blue-400 transition-all transform hover:-translate-y-0.5";
+            }
+        }
+
+        // =====================================================================
+        // 4. LÓGICA E INTERACTIVIDAD (Eventos)
+        // =====================================================================
+        
+        function configurarEventos() {
+            // Navegación
+            document.getElementById('btn-avanzar').addEventListener('click', () => {
+                if (estado.slideActual < diapositivas.length - 1) {
+                    estado.slideActual++;
+                } else {
+                    estado.slideActual = 0; // Reiniciar
+                }
+                renderizarSlide();
+            });
+
+            document.getElementById('btn-atras').addEventListener('click', () => {
+                if (estado.slideActual > 0) {
+                    estado.slideActual--;
+                    renderizarSlide();
+                }
+            });
+
+            // Delegación de eventos para el contenido dinámico del slide
+            document.getElementById('contenedor-contenido').addEventListener('click', (e) => {
+                
+                // Evento: Revelar secreto de Arduino (Slide 2)
+                const btnArduino = e.target.closest('#btn-revelar-arduino');
+                if (btnArduino) {
+                    document.getElementById('secreto-arduino').classList.remove('oculto');
+                    btnArduino.classList.add('oculto');
+                }
+
+                // Evento: Botón Traducir Código (Slide 6)
+                const btnTraducir = e.target.closest('#btn-traducir');
+                if (btnTraducir) {
+                    estado.codigoTraducido = !estado.codigoTraducido;
+                    const real = document.getElementById('codigo-real');
+                    const humano = document.getElementById('codigo-humano');
+                    const spanTexto = btnTraducir.querySelector('span');
+                    
+                    if (estado.codigoTraducido) {
+                        real.classList.add('oculto');
+                        humano.classList.remove('oculto');
+                        spanTexto.textContent = 'Ver Código C++';
+                        btnTraducir.classList.replace('bg-emerald-500', 'bg-slate-700');
+                        btnTraducir.classList.replace('hover:bg-emerald-600', 'hover:bg-slate-600');
+                        btnTraducir.querySelector('i').setAttribute('data-lucide', 'code');
+                    } else {
+                        real.classList.remove('oculto');
+                        humano.classList.add('oculto');
+                        spanTexto.textContent = 'Traducir a Humano';
+                        btnTraducir.classList.replace('bg-slate-700', 'bg-emerald-500');
+                        btnTraducir.classList.replace('hover:bg-slate-600', 'hover:bg-emerald-600');
+                        btnTraducir.querySelector('i').setAttribute('data-lucide', 'languages');
+                    }
+                    lucide.createIcons();
+                }
+
+                // Evento: Opciones del Mini Reto (Slide 7)
+                const btnOpcion = e.target.closest('.opcion-test');
+                if (btnOpcion && !btnOpcion.disabled) {
+                    const contenedorOpciones = btnOpcion.closest('.contenedor-opciones');
+                    const feedback = contenedorOpciones.nextElementSibling;
+                    const esCorrecta = btnOpcion.getAttribute('data-correcta') === 'true';
+
+                    // Deshabilitar botones de esta pregunta para evitar múltiples respuestas
+                    const botones = contenedorOpciones.querySelectorAll('.opcion-test');
+                    botones.forEach(btn => {
+                        btn.disabled = true;
+                        btn.classList.remove('hover:bg-blue-50', 'hover:border-blue-300', 'cursor-pointer');
+                        btn.classList.add('opacity-40', 'cursor-not-allowed');
+                    });
+
+                    // Mantener el botón clickeado visible
+                    btnOpcion.classList.remove('opacity-40');
+
+                    feedback.classList.remove('oculto');
+
+                    if (esCorrecta) {
+                        // Estilos de éxito
+                        btnOpcion.classList.replace('bg-slate-50', 'bg-green-100');
+                        btnOpcion.classList.replace('border-slate-200', 'border-green-500');
+                        btnOpcion.classList.replace('text-slate-600', 'text-green-800');
+                        
+                        feedback.innerHTML = `<i data-lucide="check-circle" class="inline w-5 h-5 mr-1"></i> ${btnOpcion.getAttribute('data-explicacion')}`;
+                        feedback.className = "feedback-test mt-3 text-sm font-bold p-3 rounded-lg bg-green-50 text-green-700 flex items-center slide-enter border border-green-200";
+                    } else {
+                        // Estilos de error
+                        btnOpcion.classList.replace('bg-slate-50', 'bg-red-100');
+                        btnOpcion.classList.replace('border-slate-200', 'border-red-500');
+                        btnOpcion.classList.replace('text-slate-600', 'text-red-800');
+                        btnOpcion.classList.add('shake-error');
+                        
+                        feedback.innerHTML = `<i data-lucide="x-circle" class="inline w-5 h-5 mr-1"></i> ¡Ups! Esa no es la pieza correcta. Intenta recordar la clase.`;
+                        feedback.className = "feedback-test mt-3 text-sm font-bold p-3 rounded-lg bg-red-50 text-red-700 flex items-center slide-enter border border-red-200";
+                    }
+                    lucide.createIcons();
+                }
+            });
+        }
+
+        // =====================================================================
+        // 5. INICIALIZACIÓN
+        // =====================================================================
+        window.onload = () => {
+            configurarEventos();
+            renderizarSlide();
+        };
+    </script>
+</body>
+</html>
