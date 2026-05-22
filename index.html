@@ -3,552 +3,1122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exploradores de la Robótica</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <title>RoboClase · Aventura Arduino</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-        
+        /* ============================================================
+           VARIABLES & RESET
+        ============================================================ */
+        :root {
+            --teal:       #00979C;
+            --teal-light: #e0f5f5;
+            --teal-dark:  #006f73;
+            --blue:       #3b82f6;
+            --blue-light: #dbeafe;
+            --purple:     #8b5cf6;
+            --purple-light:#ede9fe;
+            --orange:     #f97316;
+            --orange-light:#ffedd5;
+            --green:      #22c55e;
+            --green-light:#dcfce7;
+            --red:        #ef4444;
+            --red-light:  #fee2e2;
+            --yellow:     #fbbf24;
+            --yellow-light:#fef3c7;
+            --slate-900:  #0f172a;
+            --slate-700:  #334155;
+            --slate-500:  #64748b;
+            --slate-200:  #e2e8f0;
+            --slate-100:  #f1f5f9;
+            --white:      #ffffff;
+            --radius-xl:  1.5rem;
+            --radius-2xl: 2rem;
+            --shadow-card: 0 4px 24px -4px rgba(0,0,0,.10), 0 2px 8px -2px rgba(0,0,0,.06);
+            --shadow-btn:  0 4px 14px -2px rgba(0,151,156,.35);
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: 'Plus+Jakarta+Sans', sans-serif;
-            background-color: #f0f4f8;
+            font-family: 'Nunito', sans-serif;
+            background: #f0f9f9;
+            color: var(--slate-900);
+            min-height: 100vh;
             overflow-x: hidden;
         }
 
-        /* --- Animaciones Generales --- */
-        .slide-enter { animation: slideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(30px) scale(0.98); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+        /* decorative bg dots */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: radial-gradient(circle, #00979c22 1px, transparent 1px);
+            background-size: 28px 28px;
+            pointer-events: none;
+            z-index: 0;
         }
 
-        .card-hover:hover {
-            transform: translateY(-5px) scale(1.02);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        /* ============================================================
+           LAYOUT
+        ============================================================ */
+        #app { position: relative; z-index: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+        nav {
+            background: var(--white);
+            box-shadow: 0 1px 12px rgba(0,0,0,.07);
+            position: sticky; top: 0; z-index: 100;
+            padding: .75rem 1.25rem;
+        }
+        .nav-inner {
+            max-width: 860px; margin: 0 auto;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo {
+            display: flex; align-items: center; gap: .6rem;
+            cursor: pointer; text-decoration: none;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.6rem; color: var(--slate-900);
+            user-select: none;
+        }
+        .logo span { color: var(--teal); }
+        .logo-icon {
+            width: 40px; height: 40px;
+            background: var(--teal-light);
+            border-radius: .75rem;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.35rem;
         }
 
-        /* --- Animaciones de Actuadores --- */
-        .hover-spin:hover i { animation: spin 2s linear infinite; }
-        .hover-glow:hover i { filter: drop-shadow(0 0 8px #eab308); color: #eab308; }
-        .hover-shake:hover i { animation: shake 0.5s infinite; }
+        .nav-right { display: flex; align-items: center; gap: .75rem; }
+        .counter-badge {
+            background: var(--slate-100); color: var(--slate-500);
+            font-weight: 800; font-size: .8rem;
+            padding: .3rem .9rem; border-radius: 99px;
+        }
+        .btn-ghost {
+            background: var(--slate-100); color: var(--slate-500);
+            font-family: 'Nunito', sans-serif; font-weight: 800; font-size: .85rem;
+            border: none; cursor: pointer;
+            padding: .4rem 1rem; border-radius: 99px;
+            display: flex; align-items: center; gap: .4rem;
+            transition: background .2s, color .2s;
+        }
+        .btn-ghost:hover { background: var(--teal-light); color: var(--teal-dark); }
 
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-3px) rotate(-5deg); }
-            75% { transform: translateX(3px) rotate(5deg); }
+        /* progress bar */
+        #progress-bar-wrap {
+            height: 6px; background: var(--slate-200); border-radius: 99px;
+            margin-top: .6rem; overflow: hidden;
+        }
+        #progress-bar {
+            height: 100%; background: linear-gradient(90deg, var(--teal), #00c9cf);
+            border-radius: 99px; transition: width .5s cubic-bezier(.4,0,.2,1);
+            width: 0%;
         }
 
-        /* --- Animaciones del Test --- */
-        .shake-error { animation: shake-error-anim 0.4s ease-in-out; }
-        @keyframes shake-error-anim {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-5px); }
-            40%, 80% { transform: translateX(5px); }
+        main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 1.5rem 1rem 0; }
+        .view-wrap { max-width: 860px; width: 100%; }
+
+        /* bottom controls */
+        #bottom-bar {
+            max-width: 860px; margin: 0 auto;
+            padding: 1.25rem 1rem 1.5rem;
+            display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+        }
+        .btn-nav {
+            font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1rem;
+            border: none; cursor: pointer;
+            padding: .75rem 1.75rem; border-radius: 99px;
+            display: flex; align-items: center; gap: .5rem;
+            transition: all .2s;
+        }
+        .btn-prev {
+            background: var(--white); color: var(--slate-500);
+            border: 2px solid var(--slate-200);
+        }
+        .btn-prev:hover:not(:disabled) { border-color: var(--slate-400); color: var(--slate-700); }
+        .btn-prev:disabled { opacity: .35; cursor: not-allowed; }
+        .btn-next {
+            background: var(--teal); color: white;
+            box-shadow: var(--shadow-btn);
+        }
+        .btn-next:hover:not(:disabled) { background: var(--teal-dark); transform: translateY(-2px); }
+        .btn-next:disabled { opacity: .4; cursor: not-allowed; }
+        .btn-next.quiz-mode { background: var(--purple); box-shadow: 0 4px 14px -2px rgba(139,92,246,.35); }
+        .btn-next.quiz-mode:hover:not(:disabled) { background: #7c3aed; }
+
+        /* dot progress */
+        #dot-progress { display: flex; align-items: center; gap: .4rem; }
+        .dot {
+            width: 10px; height: 10px; border-radius: 99px;
+            background: var(--slate-200);
+            transition: all .4s cubic-bezier(.4,0,.2,1);
+        }
+        .dot.active { width: 28px; background: var(--teal); }
+        .dot.active.quiz-mode { background: var(--purple); }
+        .dot.done { background: var(--green); }
+
+        /* ============================================================
+           ANIMATIONS
+        ============================================================ */
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(28px) scale(.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes fadeIn   { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes bounce   { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        @keyframes shake    { 0%,100% { transform: translateX(0); } 20%,60% { transform: translateX(-5px); } 40%,80% { transform: translateX(5px); } }
+        @keyframes pop      { 0% { transform: scale(.8); opacity: 0; } 70% { transform: scale(1.08); } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes confetti { 0% { transform: translateY(-10px) rotate(0); opacity: 1; } 100% { transform: translateY(60px) rotate(360deg); opacity: 0; } }
+        @keyframes pulse    { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+
+        .anim-slideUp   { animation: slideUp .45s cubic-bezier(.4,0,.2,1) both; }
+        .anim-fadeIn    { animation: fadeIn .35s ease both; }
+        .anim-bounce    { animation: bounce 2s infinite; }
+        .anim-pop       { animation: pop .4s cubic-bezier(.4,0,.2,1) both; }
+        .anim-shake     { animation: shake .4s ease; }
+        .anim-pulse     { animation: pulse 2.5s infinite; }
+
+        /* ============================================================
+           MENU VIEW
+        ============================================================ */
+        .menu-wrapper { text-align: center; padding: 1.5rem 0 2rem; }
+        .mascot-big {
+            font-size: 5rem;
+            display: inline-block;
+            filter: drop-shadow(0 8px 16px rgba(0,151,156,.25));
+            margin-bottom: 1rem;
+        }
+        .menu-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 2.8rem; color: var(--slate-900);
+            line-height: 1.1; margin-bottom: .5rem;
+        }
+        .menu-title span { color: var(--teal); }
+        .menu-sub { color: var(--slate-500); font-size: 1.1rem; font-weight: 600; margin-bottom: 2rem; }
+
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; max-width: 600px; margin: 0 auto; }
+        @media (max-width: 500px) { .menu-grid { grid-template-columns: 1fr; } }
+
+        .menu-card {
+            background: var(--white);
+            border: 2.5px solid var(--slate-200);
+            border-radius: var(--radius-2xl);
+            padding: 2rem 1.5rem;
+            cursor: pointer;
+            transition: transform .25s, box-shadow .25s, border-color .25s;
+            box-shadow: var(--shadow-card);
+        }
+        .menu-card:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 12px 32px -6px rgba(0,0,0,.14); }
+        .menu-card:hover .card-icon-wrap { transform: scale(1.1); }
+        .menu-card-class:hover { border-color: var(--teal); }
+        .menu-card-quiz:hover  { border-color: var(--purple); }
+
+        .card-icon-wrap {
+            width: 72px; height: 72px; border-radius: var(--radius-xl);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.2rem; margin: 0 auto 1rem;
+            transition: transform .25s;
+        }
+        .bg-class  { background: var(--teal-light); }
+        .bg-quiz   { background: var(--purple-light); }
+        .menu-card h3 {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.5rem; margin-bottom: .35rem; color: var(--slate-900);
+        }
+        .menu-card p { color: var(--slate-500); font-size: .95rem; line-height: 1.5; }
+
+        .badge-count {
+            display: inline-block; margin-top: .75rem;
+            font-size: .75rem; font-weight: 800;
+            padding: .2rem .75rem; border-radius: 99px;
+        }
+        .badge-teal   { background: var(--teal-light); color: var(--teal-dark); }
+        .badge-purple { background: var(--purple-light); color: var(--purple); }
+
+        /* ============================================================
+           SLIDE / CARD LAYOUT
+        ============================================================ */
+        .slide-card {
+            background: var(--white);
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-card);
+            overflow: hidden;
+            border: 2px solid var(--slate-100);
+        }
+        .slide-header {
+            padding: 1.25rem 1.75rem 1rem;
+            border-bottom: 2px solid var(--slate-100);
+            display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem;
+        }
+        .step-pill {
+            font-size: .7rem; font-weight: 800; letter-spacing: .1em;
+            text-transform: uppercase;
+            padding: .25rem .85rem; border-radius: 99px;
+            display: inline-block; margin-bottom: .5rem;
+        }
+        .slide-header h2 {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.85rem; line-height: 1.2; color: var(--slate-900);
+        }
+        .slide-header .subtitle { color: var(--slate-500); font-size: 1rem; font-weight: 600; margin-top: .25rem; }
+        .slide-icon-box {
+            width: 60px; height: 60px; border-radius: 1rem;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem; flex-shrink: 0;
+            background: var(--slate-100);
+        }
+        .slide-body { padding: 1.25rem 1.75rem 1.5rem; }
+
+        /* color themes */
+        .theme-teal   .step-pill   { background: var(--teal-light); color: var(--teal-dark); }
+        .theme-teal   .slide-icon-box { background: var(--teal-light); }
+        .theme-blue   .step-pill   { background: var(--blue-light); color: #1d4ed8; }
+        .theme-blue   .slide-icon-box { background: var(--blue-light); }
+        .theme-orange .step-pill   { background: var(--orange-light); color: #c2410c; }
+        .theme-orange .slide-icon-box { background: var(--orange-light); }
+        .theme-green  .step-pill   { background: var(--green-light); color: #15803d; }
+        .theme-green  .slide-icon-box { background: var(--green-light); }
+        .theme-dark   .step-pill   { background: var(--slate-900); color: var(--white); }
+        .theme-dark   .slide-icon-box { background: #1e293b; }
+
+        /* accent bar at top of card */
+        .color-bar { height: 6px; width: 100%; }
+        .bar-teal   { background: linear-gradient(90deg, var(--teal), #00c9cf); }
+        .bar-blue   { background: linear-gradient(90deg, var(--blue), #60a5fa); }
+        .bar-orange { background: linear-gradient(90deg, var(--orange), #fbbf24); }
+        .bar-green  { background: linear-gradient(90deg, var(--green), #4ade80); }
+        .bar-dark   { background: linear-gradient(90deg, #0f172a, #334155); }
+        .bar-purple { background: linear-gradient(90deg, var(--purple), #c084fc); }
+
+        /* ============================================================
+           SLIDE CONTENT STYLES
+        ============================================================ */
+        /* Slide 1 — Intro */
+        .intro-body { text-align: center; padding: 1.5rem 1rem; }
+        .intro-icon {
+            font-size: 5rem; display: inline-block;
+            filter: drop-shadow(0 6px 14px rgba(0,151,156,.2));
+            margin-bottom: 1rem;
+        }
+        .intro-text { font-size: 1.1rem; color: var(--slate-500); max-width: 480px; margin: 0 auto; line-height: 1.7; }
+        .intro-text strong { color: var(--slate-900); }
+
+        /* Slide 2 — Anatomy */
+        .anatomy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        @media (max-width: 520px) { .anatomy-grid { grid-template-columns: 1fr; } }
+        .anatomy-box {
+            padding: 1.25rem; border-radius: var(--radius-xl); border: 2px solid;
+        }
+        .anatomy-setup { background: var(--blue-light); border-color: #93c5fd; }
+        .anatomy-loop  { background: var(--purple-light); border-color: #c4b5fd; }
+        .anatomy-box code {
+            font-family: 'Courier New', monospace;
+            font-size: 1rem; font-weight: 900;
+            display: block; margin-bottom: .5rem;
+        }
+        .anatomy-setup code { color: #1d4ed8; }
+        .anatomy-loop  code { color: var(--purple); }
+        .anatomy-box h4 { font-weight: 800; color: var(--slate-900); margin-bottom: .35rem; }
+        .anatomy-box p  { font-size: .92rem; color: var(--slate-700); line-height: 1.5; }
+        .anatomy-tag {
+            display: inline-block; margin-top: .5rem;
+            font-size: .78rem; font-weight: 800;
+            padding: .2rem .75rem; border-radius: 99px;
+        }
+        .tag-blue   { background: #bfdbfe; color: #1e40af; }
+        .tag-purple { background: #ddd6fe; color: #5b21b6; }
+
+        /* Slide 3 — Rules */
+        .rules-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .85rem; }
+        @media (max-width: 520px) { .rules-grid { grid-template-columns: 1fr; } }
+        .rule-card {
+            background: var(--white); border: 2px solid var(--slate-200);
+            border-radius: var(--radius-xl); padding: 1rem;
+            display: flex; gap: .85rem; align-items: flex-start;
+            transition: transform .2s, border-color .2s;
+        }
+        .rule-card:hover { transform: translateY(-3px); border-color: var(--orange); }
+        .rule-symbol {
+            width: 48px; height: 48px; border-radius: .75rem; flex-shrink: 0;
+            background: var(--orange-light); color: var(--orange);
+            font-weight: 900; font-size: 1.2rem; font-family: 'Courier New', monospace;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .rule-card h4 { font-weight: 800; color: var(--slate-900); margin-bottom: .2rem; font-size: .97rem; }
+        .rule-card p  { font-size: .85rem; color: var(--slate-500); line-height: 1.5; }
+
+        /* Slide 4 — Variables */
+        .var-box {
+            background: var(--green-light); border-left: 4px solid var(--green);
+            border-radius: var(--radius-xl); padding: 1rem 1.25rem; margin-bottom: 1rem;
+        }
+        .var-box h4 { font-weight: 800; color: #15803d; display: flex; align-items: center; gap: .4rem; margin-bottom: .35rem; }
+        .var-box p  { color: #166534; font-size: .95rem; line-height: 1.6; }
+        .var-box code {
+            display: inline-block; background: var(--white);
+            font-family: 'Courier New', monospace; font-weight: 700;
+            padding: .2rem .6rem; border-radius: .5rem;
+            margin: .3rem 0; color: var(--slate-900);
+        }
+        .cmd-list { list-style: none; display: flex; flex-direction: column; gap: .6rem; }
+        .cmd-item {
+            display: flex; align-items: center; gap: .75rem;
+            background: var(--white); border: 2px solid var(--slate-100);
+            border-radius: var(--radius-xl); padding: .8rem 1rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,.04);
+        }
+        .cmd-item code {
+            font-family: 'Courier New', monospace; font-weight: 700; font-size: .88rem; flex-shrink: 0;
+        }
+        .cmd-blue   code { color: var(--blue); }
+        .cmd-green  code { color: var(--green); }
+        .cmd-red    code { color: var(--red); }
+        .cmd-purple code { color: var(--purple); }
+        .arrow { color: var(--slate-300); flex-shrink: 0; }
+        .cmd-desc { font-size: .85rem; color: var(--slate-500); line-height: 1.4; }
+
+        /* Slide 5 — Code */
+        .translate-btn {
+            display: flex; align-items: center; gap: .5rem;
+            font-family: 'Nunito', sans-serif; font-weight: 800; font-size: .88rem;
+            border: none; cursor: pointer;
+            padding: .5rem 1.1rem; border-radius: 99px;
+            transition: all .2s;
+        }
+        .translate-btn.mode-translate { background: #ecfdf5; color: #059669; }
+        .translate-btn.mode-code      { background: #1e293b; color: #94a3b8; }
+        .translate-btn:hover { transform: scale(1.04); }
+
+        .code-block {
+            background: #0f172a; border-radius: var(--radius-xl);
+            padding: 1.25rem 1.5rem; font-family: 'Courier New', monospace;
+            font-size: .88rem; line-height: 1.9; color: #94a3b8;
+            position: relative; overflow: hidden;
+        }
+        .code-block::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+            width: 4px; background: var(--teal);
+        }
+        .tok-pink   { color: #f472b6; }
+        .tok-green  { color: #86efac; }
+        .tok-blue   { color: #7dd3fc; }
+        .tok-orange { color: #fdba74; }
+        .tok-gray   { color: #475569; font-style: italic; }
+        .human-code { color: #4ade80; font-weight: 700; }
+
+        /* ============================================================
+           QUIZ STYLES
+        ============================================================ */
+        .quiz-q-num {
+            width: 56px; height: 56px; border-radius: var(--radius-xl);
+            background: var(--purple-light); color: var(--purple);
+            font-family: 'Fredoka One', cursive; font-size: 1.6rem;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .quiz-question {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.45rem; color: var(--slate-900); line-height: 1.3;
+        }
+        .q-header { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1.25rem; }
+
+        .options-list { display: flex; flex-direction: column; gap: .7rem; }
+        .option-btn {
+            width: 100%; text-align: left; cursor: pointer;
+            background: var(--slate-100); border: 2.5px solid var(--slate-200);
+            border-radius: var(--radius-xl); padding: 1rem 1.25rem;
+            font-family: 'Nunito', sans-serif; font-weight: 700; font-size: .97rem;
+            color: var(--slate-700); line-height: 1.4;
+            transition: all .2s;
+            display: flex; align-items: center; gap: .75rem;
+        }
+        .option-btn .opt-letter {
+            width: 32px; height: 32px; border-radius: .6rem; flex-shrink: 0;
+            background: var(--white); border: 2px solid var(--slate-300);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; font-size: .8rem; transition: all .2s;
+        }
+        .option-btn:hover:not(:disabled) {
+            background: var(--purple-light); border-color: #c4b5fd; color: var(--purple);
+        }
+        .option-btn:hover:not(:disabled) .opt-letter { background: var(--purple); border-color: var(--purple); color: white; }
+        .option-btn:disabled { cursor: not-allowed; }
+
+        .option-btn.correct {
+            background: var(--green-light); border-color: var(--green); color: #166534;
+        }
+        .option-btn.correct .opt-letter { background: var(--green); border-color: var(--green); color: white; }
+        .option-btn.wrong {
+            background: var(--red-light); border-color: var(--red); color: #991b1b;
+        }
+        .option-btn.wrong .opt-letter { background: var(--red); border-color: var(--red); color: white; }
+        .option-btn.dimmed { opacity: .45; }
+
+        .feedback-box {
+            margin-top: 1rem; padding: .9rem 1.2rem;
+            border-radius: var(--radius-xl); font-weight: 800;
+            display: flex; align-items: center; gap: .6rem;
+            font-size: 1rem;
+        }
+        .feedback-ok  { background: var(--green-light); color: #166534; border: 2px solid #86efac; }
+        .feedback-err { background: var(--red-light);   color: #991b1b; border: 2px solid #fca5a5; }
+        .feedback-icon { font-size: 1.4rem; }
+
+        /* score bar */
+        .score-bar {
+            display: flex; align-items: center; gap: .75rem;
+            background: var(--purple-light); border-radius: 99px;
+            padding: .4rem .4rem .4rem .85rem;
+        }
+        .score-bar span { font-weight: 800; color: var(--purple); font-size: .88rem; }
+        .score-stars { display: flex; gap: .15rem; font-size: .9rem; }
+
+        /* ============================================================
+           RESULT SCREEN
+        ============================================================ */
+        .result-screen { text-align: center; padding: 2rem 1rem 1.5rem; }
+        .result-mascot { font-size: 5.5rem; display: inline-block; margin-bottom: .75rem; }
+        .result-title {
+            font-family: 'Fredoka One', cursive; font-size: 2.5rem; color: var(--slate-900);
+            margin-bottom: .4rem;
+        }
+        .result-sub { color: var(--slate-500); font-size: 1rem; font-weight: 600; margin-bottom: 1.5rem; }
+
+        .score-display {
+            display: inline-flex; align-items: center; gap: .6rem;
+            background: var(--yellow-light); border: 2.5px solid var(--yellow);
+            border-radius: var(--radius-xl); padding: .75rem 1.75rem;
+            margin-bottom: 1.5rem;
+        }
+        .score-display .score-num {
+            font-family: 'Fredoka One', cursive; font-size: 2.2rem; color: #92400e;
+        }
+        .score-display .score-label { font-size: .9rem; font-weight: 700; color: #92400e; }
+
+        .result-stars { font-size: 2rem; letter-spacing: .2rem; margin-bottom: 1.5rem; }
+
+        .result-btns { display: flex; justify-content: center; gap: .85rem; flex-wrap: wrap; }
+        .btn-retry, .btn-go-class {
+            font-family: 'Nunito', sans-serif; font-weight: 800;
+            border: none; cursor: pointer; border-radius: 99px; padding: .8rem 1.8rem;
+            font-size: 1rem; transition: all .2s;
+            display: flex; align-items: center; gap: .5rem;
+        }
+        .btn-retry    { background: var(--purple); color: white; box-shadow: 0 4px 14px -2px rgba(139,92,246,.4); }
+        .btn-retry:hover { background: #7c3aed; transform: translateY(-2px); }
+        .btn-go-class { background: var(--slate-100); color: var(--slate-600); border: 2px solid var(--slate-200); }
+        .btn-go-class:hover { background: var(--slate-200); }
+
+        /* confetti particles */
+        .confetti-piece {
+            position: fixed; width: 10px; height: 10px; border-radius: 2px;
+            pointer-events: none; z-index: 999;
+            animation: confetti 1.2s ease forwards;
         }
 
-        /* --- Efectos Especiales --- */
-        .pulse-brain { animation: pulse-soft 2s infinite; }
-        @keyframes pulse-soft {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.05); opacity: 0.8; }
+        /* ============================================================
+           MASCOT BUBBLE
+        ============================================================ */
+        .mascot-bubble {
+            display: flex; align-items: flex-end; gap: .75rem;
+            background: var(--white); border: 2px solid var(--slate-200);
+            border-radius: var(--radius-xl); padding: .9rem 1.1rem;
+            margin-bottom: 1.25rem; box-shadow: 0 2px 10px rgba(0,0,0,.06);
         }
+        .mascot-avatar { font-size: 2rem; line-height: 1; flex-shrink: 0; }
+        .mascot-text { font-size: .92rem; color: var(--slate-600); font-weight: 600; line-height: 1.5; }
+        .mascot-text strong { color: var(--slate-900); }
 
-        /* --- Clases Utilitarias --- */
-        .bg-robot-blue { background-color: #3b82f6; }
-        .text-robot-blue { color: #3b82f6; }
-        .oculto { display: none !important; }
+        /* ============================================================
+           UTILITIES
+        ============================================================ */
+        .hidden { display: none !important; }
+        .flex-row { display: flex; }
+        .items-center { align-items: center; }
+        .gap-2 { gap: .5rem; }
+        .mb-1 { margin-bottom: .25rem; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800">
+<body>
+<div id="app">
 
-    <div id="app" class="min-h-screen flex flex-col">
-        <nav class="bg-white shadow-sm p-4 sticky top-0 z-50">
-            <div class="max-w-5xl mx-auto flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <div class="bg-blue-100 p-2 rounded-xl">
-                        <i data-lucide="bot" class="text-robot-blue w-8 h-8"></i>
-                    </div>
-                    <span class="font-bold text-2xl tracking-tight text-slate-800">RoboClase <span class="text-robot-blue">Niños</span></span>
-                </div>
-                <div class="text-sm font-bold text-slate-400 bg-slate-100 px-4 py-2 rounded-full" id="contador-slides">
-                    1 / 7
-                </div>
+    <!-- NAV -->
+    <nav>
+        <div class="nav-inner">
+            <div class="logo" onclick="irAlMenu()">
+                <div class="logo-icon">🤖</div>
+                Robo<span>Clase</span>
             </div>
-        </nav>
-
-        <main class="flex-grow flex items-center justify-center p-4 md:p-8">
-            <div id="contenedor-contenido" class="max-w-4xl w-full bg-white rounded-3xl shadow-xl overflow-hidden min-h-[500px] flex flex-col slide-enter border border-slate-100">
-                </div>
-        </main>
-
-        <div class="p-6 max-w-4xl mx-auto w-full flex flex-col sm:flex-row justify-between items-center gap-4">
-            <button id="btn-atras" class="w-full sm:w-auto flex justify-center items-center gap-2 px-6 py-3 bg-white border-2 border-slate-200 text-slate-600 rounded-full font-bold hover:bg-slate-50 hover:border-slate-300 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
-                <i data-lucide="arrow-left"></i> Atrás
-            </button>
-            <div id="puntos-progreso" class="flex gap-2 hidden sm:flex"></div>
-            <button id="btn-avanzar" class="w-full sm:w-auto flex justify-center items-center gap-2 px-8 py-3 bg-robot-blue text-white rounded-full font-bold hover:bg-blue-600 shadow-lg shadow-blue-300 hover:shadow-blue-400 transition-all transform hover:-translate-y-0.5 disabled:opacity-30">
-                ¡Avanzar! <i data-lucide="arrow-right"></i>
-            </button>
+            <div class="nav-right">
+                <div id="counter-badge" class="counter-badge hidden">1 / 5</div>
+                <button id="btn-menu" class="btn-ghost hidden" onclick="irAlMenu()">
+                    🏠 Menú
+                </button>
+            </div>
         </div>
+        <div class="nav-inner" style="margin-top:.4rem;">
+            <div id="progress-bar-wrap" class="hidden" style="width:100%">
+                <div id="progress-bar"></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN -->
+    <main>
+        <div id="view" class="view-wrap"></div>
+    </main>
+
+    <!-- BOTTOM BAR -->
+    <div id="bottom-bar" class="hidden">
+        <button id="btn-prev" class="btn-nav btn-prev" onclick="navegar(-1)" disabled>
+            ← Atrás
+        </button>
+        <div id="dot-progress"></div>
+        <button id="btn-next" class="btn-nav btn-next" onclick="navegar(1)">
+            ¡Siguiente! →
+        </button>
     </div>
 
-    <script>
-        // =====================================================================
-        // 1. ESTADO DE LA APLICACIÓN
-        // =====================================================================
-        const estado = {
-            slideActual: 0,
-            codigoTraducido: false
-        };
+</div>
 
-        // =====================================================================
-        // 2. BASE DE DATOS DE CONTENIDO
-        // =====================================================================
-        const diapositivas = [
-            {
-                id: 'inicio',
-                titulo: '¡Despierta a la Máquina!',
-                subtitulo: 'Hoy vamos a aprender el secreto de cómo "piensan" los robots.',
-                icono: 'rocket',
-                color: 'bg-blue-500',
-                contenido: `
-                    <div class="text-center p-8">
-                        <div class="mb-6 inline-block p-6 bg-blue-100 rounded-full pulse-brain border-4 border-blue-200">
-                            <i data-lucide="bot" class="w-20 h-20 text-blue-600"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-700 mb-4">Imagina que un robot es como tú...</h3>
-                        <p class="text-lg text-slate-600 max-w-lg mx-auto mb-8 leading-relaxed">
-                            Para jugar, correr o esquivar cosas, necesitas <span class="font-bold text-blue-500">pensar</span>, necesitas tus <span class="font-bold text-green-500">sentidos</span> y necesitas tus <span class="font-bold text-red-500">músculos</span>. ¡Los robots funcionan exactamente igual!
-                        </p>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="p-6 bg-blue-50 rounded-2xl border border-blue-100 card-hover cursor-default">
-                                <i data-lucide="brain" class="w-10 h-10 mx-auto mb-3 text-blue-500"></i> 
-                                <span class="font-bold text-blue-700">El Cerebro</span>
-                            </div>
-                            <div class="p-6 bg-green-50 rounded-2xl border border-green-100 card-hover cursor-default">
-                                <i data-lucide="eye" class="w-10 h-10 mx-auto mb-3 text-green-500"></i> 
-                                <span class="font-bold text-green-700">Los Sentidos</span>
-                            </div>
-                            <div class="p-6 bg-red-50 rounded-2xl border border-red-100 card-hover cursor-default">
-                                <i data-lucide="zap" class="w-10 h-10 mx-auto mb-3 text-red-500"></i> 
-                                <span class="font-bold text-red-700">Los Músculos</span>
-                            </div>
-                        </div>
-                    </div>
-                `
-            },
-            {
-                id: 'arduino',
-                titulo: 'El Cerebro: Arduino',
-                subtitulo: 'El director de orquesta que da las órdenes.',
-                icono: 'cpu',
-                color: 'bg-indigo-600',
-                contenido: `
-                    <div class="p-8 flex flex-col md:flex-row gap-8 items-center">
-                        <div class="flex-1">
-                            <h3 class="text-2xl font-bold mb-4 text-indigo-700">La Placa Mágica</h3>
-                            <p class="text-slate-600 mb-4 text-lg">Arduino es una pequeña computadora azul. Pero tiene un problema: <strong>¡Es súper obediente, pero no sabe qué hacer por sí solo!</strong></p>
-                            <p class="text-slate-600 mb-6">Necesita que <em>tú</em> le escribas las instrucciones. Él recibe la información, la piensa súper rápido, y da órdenes.</p>
-                            
-                            <button id="btn-revelar-arduino" class="px-6 py-2 bg-indigo-100 text-indigo-700 font-bold rounded-lg hover:bg-indigo-200 transition-colors">
-                                <i data-lucide="search" class="inline w-5 h-5 mr-1"></i> ¿Qué puede controlar?
-                            </button>
-                            
-                            <div id="secreto-arduino" class="oculto mt-4 bg-indigo-50 p-5 rounded-xl border-l-4 border-indigo-500">
-                                <ul class="space-y-2 text-indigo-800 font-medium">
-                                    <li>🚦 Semáforos inteligentes</li>
-                                    <li>🤖 Brazos robóticos</li>
-                                    <li>🚗 Carritos que esquivan paredes</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="flex-1 bg-slate-900 rounded-2xl p-8 text-center relative overflow-hidden group">
-                            <div class="absolute inset-0 bg-indigo-500 opacity-20 group-hover:opacity-40 transition-opacity"></div>
-                            <i data-lucide="microchip" class="w-40 h-40 mx-auto text-indigo-400 mb-4 pulse-brain relative z-10"></i>
-                            <p class="text-sm text-indigo-200 relative z-10 font-mono">ARDUINO UNO R3</p>
-                        </div>
-                    </div>
-                `
-            },
-            {
-                id: 'sensores',
-                titulo: 'Los Sentidos: Sensores',
-                subtitulo: 'Así es como el robot siente el mundo.',
-                icono: 'eye',
-                color: 'bg-green-500',
-                contenido: `
-                    <div class="p-8">
-                        <p class="text-center text-slate-600 mb-8 text-lg">Si le tapamos los ojos y los oídos al robot, chocará. Los sensores recogen información de afuera y se la envían al cerebro (Arduino).</p>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div class="p-6 bg-white border-2 border-green-100 rounded-2xl card-hover relative overflow-hidden group cursor-pointer">
-                                <div class="absolute top-0 left-0 w-full h-2 bg-emerald-400"></div>
-                                <i data-lucide="waves" class="w-12 h-12 text-emerald-500 mb-4 group-hover:scale-110 transition-transform"></i>
-                                <h4 class="font-bold text-xl mb-2 text-slate-800">Ultrasonido</h4>
-                                <p class="text-slate-600">Es como el súper-oído de un murciélago. Lanza un sonido invisible que rebota y le dice a qué distancia hay una pared.</p>
-                            </div>
-                            <div class="p-6 bg-white border-2 border-yellow-100 rounded-2xl card-hover relative overflow-hidden group cursor-pointer">
-                                <div class="absolute top-0 left-0 w-full h-2 bg-yellow-400"></div>
-                                <i data-lucide="sun" class="w-12 h-12 text-yellow-500 mb-4 group-hover:scale-110 transition-transform"></i>
-                                <h4 class="font-bold text-xl mb-2 text-slate-800">Sensor de Luz (LDR)</h4>
-                                <p class="text-slate-600">Son los ojos del robot. Detecta si estás en una habitación oscura o si le está dando el sol directamente.</p>
-                            </div>
-                            <div class="p-6 bg-white border-2 border-orange-100 rounded-2xl card-hover relative overflow-hidden group cursor-pointer">
-                                <div class="absolute top-0 left-0 w-full h-2 bg-orange-400"></div>
-                                <i data-lucide="mouse-pointer-2" class="w-12 h-12 text-orange-500 mb-4 group-hover:scale-110 transition-transform"></i>
-                                <h4 class="font-bold text-xl mb-2 text-slate-800">Pulsador</h4>
-                                <p class="text-slate-600">Es su sentido del tacto. Funciona como el botón de un control de videojuegos: sabe exactamente cuándo lo presionas.</p>
-                            </div>
-                        </div>
-                    </div>
-                `
-            },
-            {
-                id: 'actuadores',
-                titulo: 'Los Músculos: Actuadores',
-                subtitulo: '¡Pasa el ratón por encima para activarlos!',
-                icono: 'zap',
-                color: 'bg-red-500',
-                contenido: `
-                    <div class="p-8 space-y-4">
-                        <p class="text-slate-600 mb-6 text-lg">Una vez que el Arduino "piensa", necesita usar sus músculos para hacer algo. A estas piezas las llamamos actuadores.</p>
-                        
-                        <div class="flex items-center gap-6 p-5 bg-white border-2 border-slate-100 rounded-2xl hover-glow cursor-pointer transition-all duration-300">
-                            <div class="p-4 bg-slate-50 rounded-xl transition-all duration-300"><i data-lucide="lightbulb" class="w-10 h-10 text-slate-400 transition-colors duration-300"></i></div>
-                            <div>
-                                <h4 class="font-bold text-xl text-slate-800">LEDs</h4>
-                                <p class="text-slate-600">Son los gestos del robot. Las usa para "hablar", avisar si hay un error, o simplemente encender los faros de un carro.</p>
-                            </div>
-                        </div>
+<script>
+/* ================================================================
+   ESTADO
+================================================================ */
+const S = {
+    vista: 'menu',   // 'menu' | 'clase' | 'quiz' | 'resultado'
+    slide: 0,
+    puntaje: 0,
+    respondido: false
+};
 
-                        <div class="flex items-center gap-6 p-5 bg-white border-2 border-slate-100 rounded-2xl hover-spin cursor-pointer transition-all duration-300">
-                            <div class="p-4 bg-slate-50 rounded-xl"><i data-lucide="settings" class="w-10 h-10 text-blue-500"></i></div>
-                            <div>
-                                <h4 class="font-bold text-xl text-slate-800">Servomotores</h4>
-                                <p class="text-slate-600">Son los músculos reales. Gracias a ellos, el robot puede mover sus llantas, girar una cámara o abrir una compuerta.</p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center gap-6 p-5 bg-white border-2 border-slate-100 rounded-2xl hover-shake cursor-pointer transition-all duration-300">
-                            <div class="p-4 bg-slate-50 rounded-xl"><i data-lucide="volume-2" class="w-10 h-10 text-purple-500"></i></div>
-                            <div>
-                                <h4 class="font-bold text-xl text-slate-800">Buzzer (Zumbador)</h4>
-                                <p class="text-slate-600">Las cuerdas vocales. Emite pitidos, alarmas o hasta pequeñas melodías tipo Mario Bros.</p>
-                            </div>
-                        </div>
-                    </div>
-                `
-            },
-            {
-                id: 'logica',
-                titulo: 'Lógica: Las Reglas del Juego',
-                subtitulo: 'Cómo le explicamos al robot lo que queremos.',
-                icono: 'file-text',
-                color: 'bg-purple-600',
-                contenido: `
-                    <div class="p-8 flex flex-col md:flex-row gap-8">
-                        <div class="flex-1">
-                            <p class="text-lg text-slate-600 mb-6">Programar no es magia, es dar instrucciones paso a paso, como una <strong>receta de cocina</strong> súper detallada.</p>
-                            
-                            <div class="space-y-4">
-                                <div class="bg-purple-50 p-4 rounded-xl border-l-4 border-purple-400">
-                                    <h4 class="font-bold text-purple-800 flex items-center gap-2"><i data-lucide="box" class="w-5 h-5"></i> 1. Variables</h4>
-                                    <p class="text-sm text-purple-600 mt-1">Son "cajas" con etiquetas. Ej: Una caja llamada 'Velocidad' donde guardamos el número 100.</p>
-                                </div>
-                                <div class="bg-pink-50 p-4 rounded-xl border-l-4 border-pink-400">
-                                    <h4 class="font-bold text-pink-800 flex items-center gap-2"><i data-lucide="split" class="w-5 h-5"></i> 2. Condicionales</h4>
-                                    <p class="text-sm text-pink-600 mt-1">Son los caminos. <em>"<strong>SI</strong> el sensor ve una pared, <strong>ENTONCES</strong> frena."</em></p>
-                                </div>
-                                <div class="bg-blue-50 p-4 rounded-xl border-l-4 border-blue-400">
-                                    <h4 class="font-bold text-blue-800 flex items-center gap-2"><i data-lucide="rotate-cw" class="w-5 h-5"></i> 3. Bucles</h4>
-                                    <p class="text-sm text-blue-600 mt-1">Hacer algo muchas veces. <em>"Parpadea la luz ROJA infinitamente hasta que yo te diga."</em></p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex-1 flex flex-col items-center justify-center bg-slate-100 rounded-2xl p-6 border-dashed border-4 border-slate-200">
-                            <i data-lucide="gamepad-2" class="w-24 h-24 text-purple-300 mb-4"></i>
-                            <p class="text-center text-slate-500 font-bold">¡Es como poner reglas en un videojuego!</p>
-                        </div>
-                    </div>
-                `
-            },
-            {
-                id: 'codigo',
-                titulo: 'El Idioma Secreto: C++',
-                subtitulo: '¡Vamos a hackear al Arduino!',
-                icono: 'code',
-                color: 'bg-slate-800',
-                contenido: `
-                    <div class="p-8">
-                        <div class="flex justify-between items-center mb-4">
-                            <p class="text-slate-600 text-lg">Este es el idioma que lee Arduino. Parece difícil, pero lo vamos a traducir.</p>
-                            <button id="btn-traducir" class="px-4 py-2 bg-emerald-500 text-white font-bold rounded-lg hover:bg-emerald-600 flex items-center gap-2 transition-colors">
-                                <i data-lucide="languages" class="w-5 h-5"></i> <span>Traducir a Humano</span>
-                            </button>
-                        </div>
-                        
-                        <div class="bg-slate-900 rounded-2xl p-6 font-mono text-sm text-slate-300 shadow-inner relative overflow-hidden">
-                            <div class="absolute top-0 left-0 w-2 h-full bg-slate-700"></div>
-                            
-                            <div id="codigo-real" class="space-y-2 ml-4">
-                                <p><span class="text-slate-500 italic">// Configuración inicial (Solo se lee una vez)</span></p>
-                                <p><span class="text-pink-400">void</span> <span class="text-green-300">setup</span>() {</p>
-                                <p class="pl-6"><span class="text-blue-300">pinMode</span>(<span class="text-orange-300">13</span>, <span class="text-blue-400">OUTPUT</span>);</p>
-                                <p>}</p>
-                                <br>
-                                <p><span class="text-slate-500 italic">// El ciclo infinito (Se repite para siempre)</span></p>
-                                <p><span class="text-pink-400">void</span> <span class="text-green-300">loop</span>() {</p>
-                                <p class="pl-6"><span class="text-blue-300">digitalWrite</span>(<span class="text-orange-300">13</span>, <span class="text-blue-400">HIGH</span>);</p>
-                                <p>}</p>
-                            </div>
-
-                            <div id="codigo-humano" class="space-y-2 ml-4 oculto text-emerald-300 font-bold">
-                                <p><span class="text-emerald-500 italic">Prepara las cosas (Esto se hace 1 vez al prenderlo)</span></p>
-                                <p>Preparar() {</p>
-                                <p class="pl-6">Configura el enchufe número 13 para enviar energía Hacia Afuera.</p>
-                                <p>}</p>
-                                <br>
-                                <p><span class="text-emerald-500 italic">La acción (Repite esto sin parar)</span></p>
-                                <p>Accion_Infinita() {</p>
-                                <p class="pl-6">Envíale energía (ENCIENDE) al enchufe número 13.</p>
-                                <p>}</p>
-                            </div>
-                        </div>
-                    </div>
-                `
-            },
-            {
-                id: 'reto',
-                titulo: '¡Mini Reto Final!',
-                subtitulo: 'Demuestra que ya eres un Explorador de Robótica.',
-                icono: 'trophy',
-                color: 'bg-yellow-500',
-                contenido: `
-                    <div class="p-4 md:p-8 text-center max-h-[600px] overflow-y-auto">
-                        <i data-lucide="medal" class="w-16 h-16 text-yellow-500 mx-auto mb-4 pulse-brain"></i>
-                        <h3 class="text-xl md:text-2xl font-bold text-slate-800 mb-6">¿Qué pieza usarías si quieres que el robot...</h3>
-                        
-                        <div class="space-y-4 max-w-2xl mx-auto text-left pb-4">
-                            
-                            <div class="p-4 md:p-5 border-2 border-slate-200 rounded-xl bg-white shadow-sm transition-all hover:border-slate-300">
-                                <p class="font-bold text-slate-700 mb-4 flex items-center gap-3">
-                                    <span class="bg-yellow-100 text-yellow-700 w-8 h-8 flex items-center justify-center rounded-full text-sm shrink-0">1</span> 
-                                    ...encienda una luz para avisar que está encendido?
-                                </p>
-                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 contenedor-opciones">
-                                    <button class="opcion-test p-3 bg-slate-50 border border-slate-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors font-medium text-slate-600 flex flex-col items-center justify-center gap-2" data-correcta="true" data-explicacion="¡Correcto! El LED es el actuador que emite luz."><i data-lucide="lightbulb" class="w-6 h-6"></i> LED</button>
-                                    <button class="opcion-test p-3 bg-slate-50 border border-slate-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors font-medium text-slate-600 flex flex-col items-center justify-center gap-2" data-correcta="false"><i data-lucide="cpu" class="w-6 h-6"></i> Arduino</button>
-                                    <button class="opcion-test p-3 bg-slate-50 border border-slate-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors font-medium text-slate-600 flex flex-col items-center justify-center gap-2" data-correcta="false"><i data-lucide="waves" class="w-6 h-6"></i> Ultrasonido</button>
-                                </div>
-                                <div class="feedback-test oculto mt-3 text-sm font-bold p-3 rounded-lg"></div>
-                            </div>
-
-                            <div class="p-4 md:p-5 border-2 border-slate-200 rounded-xl bg-white shadow-sm transition-all hover:border-slate-300">
-                                <p class="font-bold text-slate-700 mb-4 flex items-center gap-3">
-                                    <span class="bg-yellow-100 text-yellow-700 w-8 h-8 flex items-center justify-center rounded-full text-sm shrink-0">2</span> 
-                                    ...sepa que hay una pared enfrente para no chocar?
-                                </p>
-                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 contenedor-opciones">
-                                    <button class="opcion-test p-3 bg-slate-50 border border-slate-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors font-medium text-slate-600 flex flex-col items-center justify-center gap-2" data-correcta="false"><i data-lucide="volume-2" class="w-6 h-6"></i> Buzzer</button>
-                                    <button class="opcion-test p-3 bg-slate-50 border border-slate-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors font-medium text-slate-600 flex flex-col items-center justify-center gap-2" data-correcta="true" data-explicacion="¡Excelente! El Ultrasonido es el sensor que detecta distancias."><i data-lucide="waves" class="w-6 h-6"></i> Ultrasonido</button>
-                                    <button class="opcion-test p-3 bg-slate-50 border border-slate-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors font-medium text-slate-600 flex flex-col items-center justify-center gap-2" data-correcta="false"><i data-lucide="settings" class="w-6 h-6"></i> Servomotor</button>
-                                </div>
-                                <div class="feedback-test oculto mt-3 text-sm font-bold p-3 rounded-lg"></div>
-                            </div>
-
-                            <div class="p-4 md:p-5 border-2 border-slate-200 rounded-xl bg-white shadow-sm transition-all hover:border-slate-300">
-                                <p class="font-bold text-slate-700 mb-4 flex items-center gap-3">
-                                    <span class="bg-yellow-100 text-yellow-700 w-8 h-8 flex items-center justify-center rounded-full text-sm shrink-0">3</span> 
-                                    ...procese la información de los sensores y dé órdenes?
-                                </p>
-                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 contenedor-opciones">
-                                    <button class="opcion-test p-3 bg-slate-50 border border-slate-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors font-medium text-slate-600 flex flex-col items-center justify-center gap-2" data-correcta="false"><i data-lucide="mouse-pointer-2" class="w-6 h-6"></i> Pulsador</button>
-                                    <button class="opcion-test p-3 bg-slate-50 border border-slate-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors font-medium text-slate-600 flex flex-col items-center justify-center gap-2" data-correcta="false"><i data-lucide="sun" class="w-6 h-6"></i> Sensor de Luz</button>
-                                    <button class="opcion-test p-3 bg-slate-50 border border-slate-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors font-medium text-slate-600 flex flex-col items-center justify-center gap-2" data-correcta="true" data-explicacion="¡Magia pura! Arduino es el cerebro que dirige todo."><i data-lucide="cpu" class="w-6 h-6"></i> Arduino</button>
-                                </div>
-                                <div class="feedback-test oculto mt-3 text-sm font-bold p-3 rounded-lg"></div>
-                            </div>
-
-                        </div>
-                    </div>
-                `
-            }
-        ];
-
-        // =====================================================================
-        // 3. RENDERIZADO E INTERFAZ (UI)
-        // =====================================================================
-        
-        function renderizarSlide() {
-            const slide = diapositivas[estado.slideActual];
-            const contenedor = document.getElementById('contenedor-contenido');
-            
-            document.getElementById('contador-slides').innerText = `${estado.slideActual + 1} / ${diapositivas.length}`;
-
-            // Reiniciar animación del slide
-            contenedor.classList.remove('slide-enter');
-            void contenedor.offsetWidth; // Forzar repintado del DOM para reiniciar animación
-            contenedor.classList.add('slide-enter');
-
-            // Inyectar HTML
-            contenedor.innerHTML = `
-                <div class="h-3 w-full ${slide.color}"></div>
-                <div class="p-6 md:p-8 border-b border-slate-100 flex justify-between items-start">
+/* ================================================================
+   DATOS — SLIDES
+================================================================ */
+const SLIDES = [
+    {
+        tema: 'teal', icono: '🚀',
+        titulo: '¡Tu Primera Aventura!',
+        sub: 'Vamos a darle vida a la tecnología.',
+        mascota: '¡Hola! Soy <strong>Bit</strong>, tu asistente robótico. ¡Juntos aprenderemos a programar desde cero! 🎉',
+        html: `
+            <div class="intro-body">
+                <div class="intro-icon anim-bounce">🤖</div>
+                <p class="intro-text">
+                    Imagina que el Arduino es un robot súper veloz, pero que de entrada
+                    <strong>no sabe hacer absolutamente nada</strong>.
+                    <br><br>
+                    <strong>Programar</strong> es darle una lista de instrucciones paso a paso
+                    para que cobre vida. Nosotros le hablamos en un lenguaje llamado <strong>C++</strong>.
+                </p>
+            </div>
+        `
+    },
+    {
+        tema: 'blue', icono: '🧱',
+        titulo: 'Anatomía de un Programa',
+        sub: 'Todo código tiene dos partes mágicas y obligatorias.',
+        mascota: 'Piensa en <strong>setup()</strong> como el desayuno — solo lo haces una vez al iniciar el día. Y en <strong>loop()</strong> como respirar — ¡no para nunca! 😄',
+        html: `
+            <div class="anatomy-grid">
+                <div class="anatomy-box anatomy-setup">
+                    <code>void setup() { }</code>
+                    <h4>⚙️ La Preparación</h4>
+                    <p>Le decimos al Arduino qué herramientas va a usar.<br>
+                    <span class="anatomy-tag tag-blue">¡Se lee una sola vez al prender!</span></p>
+                </div>
+                <div class="anatomy-box anatomy-loop">
+                    <code>void loop() { }</code>
+                    <h4>⚡ La Acción</h4>
+                    <p>Aquí van las instrucciones principales. El Arduino las repite súper rápido.<br>
+                    <span class="anatomy-tag tag-purple">¡Hasta el infinito!</span></p>
+                </div>
+            </div>
+        `
+    },
+    {
+        tema: 'orange', icono: '📏',
+        titulo: 'Las 4 Reglas de Oro',
+        sub: 'Si te equivocas, ¡el Arduino se confunde!',
+        mascota: 'Las reglas del código son como la partitura de una canción — si cambias una nota, ¡la melodía suena rara! 🎵',
+        html: `
+            <div class="rules-grid">
+                <div class="rule-card">
+                    <div class="rule-symbol">;</div>
                     <div>
-                        <span class="inline-block px-4 py-1 rounded-full text-xs font-bold tracking-widest mb-3 ${slide.color} text-white shadow-sm">
-                            PASO ${estado.slideActual + 1}
-                        </span>
-                        <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-2">${slide.titulo}</h2>
-                        <p class="text-slate-500 text-lg font-medium">${slide.subtitulo}</p>
-                    </div>
-                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 shadow-sm hidden md:block">
-                        <i data-lucide="${slide.icono}" class="w-10 h-10 text-slate-400"></i>
+                        <h4>El punto y coma</h4>
+                        <p>Cada instrucción termina con <code style="font-family:monospace;font-weight:700">;</code> — es como el punto final de una oración.</p>
                     </div>
                 </div>
-                <div class="flex-grow flex flex-col justify-center">
-                    ${slide.contenido}
+                <div class="rule-card">
+                    <div class="rule-symbol">{ }</div>
+                    <div>
+                        <h4>Las llaves</h4>
+                        <p>Agrupan instrucciones, como una mochila que guarda tus cosas.</p>
+                    </div>
                 </div>
-            `;
+                <div class="rule-card">
+                    <div class="rule-symbol">Aa</div>
+                    <div>
+                        <h4>Mayúsculas</h4>
+                        <p>Para Arduino, <code style="font-family:monospace;font-size:.82rem">PinMode</code> y <code style="font-family:monospace;font-size:.82rem">pinMode</code> son palabras totalmente distintas.</p>
+                    </div>
+                </div>
+                <div class="rule-card">
+                    <div class="rule-symbol">//</div>
+                    <div>
+                        <h4>Los Comentarios</h4>
+                        <p>Dos barras hacen notas secretas — el Arduino ignora esa línea por completo.</p>
+                    </div>
+                </div>
+            </div>
+        `
+    },
+    {
+        tema: 'green', icono: '📦',
+        titulo: 'Variables y Comandos',
+        sub: 'El vocabulario básico para dar órdenes.',
+        mascota: 'Una variable es como una <strong>caja con etiqueta</strong>. Escribes el nombre y el Arduino sabe qué guardar ahí. ¡Así de simple! 📦',
+        html: `
+            <div class="var-box">
+                <h4>📦 ¿Qué es una Variable?</h4>
+                <p>Son cajitas con etiquetas donde guardamos información.<br>
+                <code>int miLed = 13;</code>
+                <span style="color:#15803d;font-size:.88rem;font-weight:700"> → La cajita "miLed" guarda el número 13.</span></p>
+            </div>
+            <p style="font-weight:800;color:var(--slate-700);margin-bottom:.75rem">🕹️ Tus Primeros Comandos:</p>
+            <ul class="cmd-list">
+                <li class="cmd-item cmd-blue">
+                    <code>pinMode(pin, OUTPUT);</code>
+                    <span class="arrow">→</span>
+                    <span class="cmd-desc">Prepara el pin para enviar energía hacia afuera.</span>
+                </li>
+                <li class="cmd-item cmd-green">
+                    <code>digitalWrite(pin, HIGH);</code>
+                    <span class="arrow">→</span>
+                    <span class="cmd-desc">¡Enciende el pin! — Dale energía.</span>
+                </li>
+                <li class="cmd-item cmd-red">
+                    <code>digitalWrite(pin, LOW);</code>
+                    <span class="arrow">→</span>
+                    <span class="cmd-desc">¡Apaga el pin! — Quítale la energía.</span>
+                </li>
+                <li class="cmd-item cmd-purple">
+                    <code>delay(1000);</code>
+                    <span class="arrow">→</span>
+                    <span class="cmd-desc">Espera 1 segundo sin hacer nada más. (1000 ms = 1 s)</span>
+                </li>
+            </ul>
+        `
+    },
+    {
+        tema: 'dark', icono: '💻',
+        titulo: '¡Tu Primer Código!',
+        sub: 'Hagamos parpadear una luz LED.',
+        mascota: 'Pulsa <strong>"Traducir a Humano"</strong> si el código se ve complicado — ¡te lo explico en español! 🌟',
+        html: `
+            <div style="display:flex;justify-content:flex-end;margin-bottom:.85rem">
+                <button id="btn-traducir" class="translate-btn mode-translate" onclick="toggleCode()">
+                    <span id="icon-traducir">🌐</span>
+                    <span id="text-traducir">Traducir a Humano</span>
+                </button>
+            </div>
+            <div class="code-block">
+                <div id="code-real">
+<span class="tok-pink">int</span> led = <span class="tok-orange">13</span>; <span class="tok-gray">// Guardamos el número 13 en la variable 'led'</span>
 
-            // Reseteamos el estado de traducción visual si cambiamos de slide
-            estado.codigoTraducido = false;
+<span class="tok-pink">void</span> <span class="tok-green">setup</span>() {
+  <span class="tok-gray">// Preparamos el pin 13 para que envíe energía</span>
+  <span class="tok-blue">pinMode</span>(led, <span class="tok-blue">OUTPUT</span>);
+}
 
-            renderizarPuntosProgreso();
-            actualizarBotonesNavegacion();
-            lucide.createIcons(); // Recargar iconos de Lucide
+<span class="tok-pink">void</span> <span class="tok-green">loop</span>() {
+  <span class="tok-blue">digitalWrite</span>(led, <span class="tok-blue">HIGH</span>); <span class="tok-gray">// ¡Se enciende la luz!</span>
+  <span class="tok-blue">delay</span>(<span class="tok-orange">1000</span>);             <span class="tok-gray">// Espera 1 segundo</span>
+  <span class="tok-blue">digitalWrite</span>(led, <span class="tok-blue">LOW</span>);  <span class="tok-gray">// ¡Se apaga la luz!</span>
+  <span class="tok-blue">delay</span>(<span class="tok-orange">1000</span>);             <span class="tok-gray">// Espera 1 segundo y repite...</span>
+}
+                </div>
+                <div id="code-humano" class="hidden human-code">
+Cajita_Número  led  =  13 ;
+
+Preparación_Inicial() {
+  Configurar_Pin( led, ENVIAR_ENERGÍA );
+}
+
+Ciclo_Infinito() {
+  Encender_Pin( led );
+  Esperar( 1 segundo );
+  Apagar_Pin( led );
+  Esperar( 1 segundo );
+}
+                </div>
+            </div>
+        `
+    }
+];
+
+/* ================================================================
+   DATOS — QUIZ
+================================================================ */
+const QUIZ = [
+    {
+        pregunta: '¿Qué hace la parte del código llamada void setup()?',
+        mascota: '💡 Piensa: ¿qué parte del programa se ejecuta solo una vez al inicio?',
+        opciones: [
+            { texto: 'Repite las instrucciones hasta el infinito, sin parar.', ok: false },
+            { texto: 'Prepara las herramientas y se lee una sola vez al prender el Arduino.', ok: true },
+            { texto: 'Apaga todas las luces del circuito automáticamente.', ok: false }
+        ]
+    },
+    {
+        pregunta: '¿Qué símbolo es obligatorio poner al final de casi todas las instrucciones en C++?',
+        mascota: '🎵 Es como el silencio al final de una frase musical — sin él, la "canción" no cierra bien.',
+        opciones: [
+            { texto: 'Dos puntos  ( : )', ok: false },
+            { texto: 'Un signo de interrogación  ( ? )', ok: false },
+            { texto: 'Un punto y coma  ( ; )', ok: true }
+        ]
+    },
+    {
+        pregunta: 'Tienes un LED en el pin 8. ¿Qué comando le da energía para encenderlo?',
+        mascota: '⚡ HIGH = alto = encendido = mucha energía. ¡Recuérdalo así!',
+        opciones: [
+            { texto: 'digitalWrite(8, LOW);', ok: false },
+            { texto: 'digitalWrite(8, HIGH);', ok: true },
+            { texto: 'delay(1000);', ok: false }
+        ]
+    },
+    {
+        pregunta: '¿Para qué sirven las Variables en programación?',
+        mascota: '📦 ¿Recuerdas las cajitas con etiquetas? ¡Eso es exactamente lo que son!',
+        opciones: [
+            { texto: 'Para que el Arduino funcione sin necesitar baterías.', ok: false },
+            { texto: 'Solo para que el código tenga colores más bonitos.', ok: false },
+            { texto: 'Como "cajitas con etiquetas" donde guardamos información.', ok: true }
+        ]
+    },
+    {
+        pregunta: 'Si escribes  //  antes de una frase en tu código, ¿qué hace el Arduino?',
+        mascota: '🤫 Es como escribir en tinta invisible — solo tú lo ves, ¡el Arduino no!',
+        opciones: [
+            { texto: 'Se convierte en un comentario secreto y el Arduino lo ignora por completo.', ok: true },
+            { texto: 'El Arduino lee la frase e intenta ejecutarla como un comando.', ok: false },
+            { texto: 'El programa lanza un error rojo y deja de funcionar.', ok: false }
+        ]
+    }
+];
+
+/* ================================================================
+   HELPERS
+================================================================ */
+let codigoHumano = false;
+
+function toggleCode() {
+    codigoHumano = !codigoHumano;
+    document.getElementById('code-real').classList.toggle('hidden', codigoHumano);
+    document.getElementById('code-humano').classList.toggle('hidden', !codigoHumano);
+    const btn = document.getElementById('btn-traducir');
+    const txt = document.getElementById('text-traducir');
+    const ico = document.getElementById('icon-traducir');
+    if (codigoHumano) {
+        btn.className = 'translate-btn mode-code';
+        txt.textContent = 'Ver Código C++';
+        ico.textContent = '💻';
+    } else {
+        btn.className = 'translate-btn mode-translate';
+        txt.textContent = 'Traducir a Humano';
+        ico.textContent = '🌐';
+    }
+}
+
+function spawnConfetti() {
+    const colors = ['#00979C','#f97316','#8b5cf6','#22c55e','#fbbf24','#ef4444','#3b82f6'];
+    for (let i = 0; i < 30; i++) {
+        const el = document.createElement('div');
+        el.className = 'confetti-piece';
+        el.style.cssText = `
+            left:${Math.random()*100}vw;
+            top:${Math.random()*40+20}vh;
+            background:${colors[Math.floor(Math.random()*colors.length)]};
+            transform:rotate(${Math.random()*360}deg);
+            animation-delay:${Math.random()*0.5}s;
+            animation-duration:${.8+Math.random()*0.8}s;
+        `;
+        document.body.appendChild(el);
+        el.addEventListener('animationend', () => el.remove());
+    }
+}
+
+function estrellas(puntaje, total) {
+    const pct = puntaje / total;
+    if (pct === 1)   return '⭐⭐⭐';
+    if (pct >= 0.6)  return '⭐⭐';
+    return '⭐';
+}
+
+/* ================================================================
+   RENDER — MENÚ
+================================================================ */
+function renderMenu() {
+    document.getElementById('counter-badge').classList.add('hidden');
+    document.getElementById('btn-menu').classList.add('hidden');
+    document.getElementById('progress-bar-wrap').classList.add('hidden');
+    document.getElementById('bottom-bar').classList.add('hidden');
+
+    document.getElementById('view').innerHTML = `
+        <div class="menu-wrapper anim-fadeIn">
+            <div class="mascot-big anim-bounce">🤖</div>
+            <h1 class="menu-title">¡Bienvenido a<br><span>RoboClase</span>!</h1>
+            <p class="menu-sub">Elige tu misión de hoy para comenzar a programar.</p>
+            <div class="menu-grid">
+                <div class="menu-card menu-card-class" onclick="iniciar('clase')">
+                    <div class="card-icon-wrap bg-class">📖</div>
+                    <h3>Clase Introductoria</h3>
+                    <p>Aprende qué es Arduino, cómo piensa y lee tus primeros códigos.</p>
+                    <span class="badge-count badge-teal">5 lecciones</span>
+                </div>
+                <div class="menu-card menu-card-quiz" onclick="iniciar('quiz')">
+                    <div class="card-icon-wrap bg-quiz">🎮</div>
+                    <h3>Cuestionario</h3>
+                    <p>¡Pon a prueba tu cerebro y demuestra que eres un experto!</p>
+                    <span class="badge-count badge-purple">5 preguntas</span>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+/* ================================================================
+   RENDER — SLIDE DE CLASE
+================================================================ */
+function renderClase() {
+    const d = SLIDES[S.slide];
+    const total = SLIDES.length;
+
+    // nav
+    document.getElementById('counter-badge').textContent = `${S.slide+1} / ${total}`;
+    document.getElementById('counter-badge').classList.remove('hidden');
+    document.getElementById('btn-menu').classList.remove('hidden');
+    document.getElementById('progress-bar-wrap').classList.remove('hidden');
+    document.getElementById('progress-bar').style.width = `${((S.slide+1)/total)*100}%`;
+
+    // bottom bar
+    const bb = document.getElementById('bottom-bar');
+    bb.classList.remove('hidden');
+    const prev = document.getElementById('btn-prev');
+    const next = document.getElementById('btn-next');
+    prev.disabled = S.slide === 0;
+    next.className = 'btn-nav btn-next';
+    next.textContent = S.slide === total-1 ? '✅ ¡Terminar!' : '¡Siguiente! →';
+
+    // dots
+    let dots = '';
+    for(let i=0;i<total;i++){
+        const cls = i===S.slide ? 'dot active' : (i<S.slide ? 'dot done' : 'dot');
+        dots += `<div class="${cls}"></div>`;
+    }
+    document.getElementById('dot-progress').innerHTML = dots;
+
+    // card
+    codigoHumano = false;
+    document.getElementById('view').innerHTML = `
+        <div class="slide-card theme-${d.tema} anim-slideUp">
+            <div class="color-bar bar-${d.tema}"></div>
+            <div class="slide-header">
+                <div>
+                    <span class="step-pill">PASO ${S.slide+1}</span>
+                    <h2>${d.titulo}</h2>
+                    <p class="subtitle">${d.sub}</p>
+                </div>
+                <div class="slide-icon-box">${d.icono}</div>
+            </div>
+            <div class="slide-body">
+                <div class="mascot-bubble">
+                    <div class="mascot-avatar">🤖</div>
+                    <div class="mascot-text">${d.mascota}</div>
+                </div>
+                ${d.html}
+            </div>
+        </div>
+    `;
+}
+
+/* ================================================================
+   RENDER — PREGUNTA DE QUIZ
+================================================================ */
+function renderQuiz() {
+    const q = QUIZ[S.slide];
+    const total = QUIZ.length;
+    S.respondido = false;
+
+    // nav
+    document.getElementById('counter-badge').textContent = `${S.slide+1} / ${total}`;
+    document.getElementById('counter-badge').classList.remove('hidden');
+    document.getElementById('btn-menu').classList.remove('hidden');
+    document.getElementById('progress-bar-wrap').classList.remove('hidden');
+    document.getElementById('progress-bar').style.width = `${((S.slide+1)/total)*100}%`;
+
+    // bottom bar
+    const bb = document.getElementById('bottom-bar');
+    bb.classList.remove('hidden');
+    const prev = document.getElementById('btn-prev');
+    const next = document.getElementById('btn-next');
+    prev.disabled = S.slide === 0;
+    next.disabled = true;
+    next.className = 'btn-nav btn-next quiz-mode';
+    next.textContent = S.slide === total-1 ? '🏆 Ver resultado' : '¡Siguiente! →';
+
+    // dots
+    let dots = '';
+    for(let i=0;i<total;i++){
+        const cls = i===S.slide ? 'dot active quiz-mode' : (i<S.slide ? 'dot done' : 'dot');
+        dots += `<div class="${cls}"></div>`;
+    }
+    document.getElementById('dot-progress').innerHTML = dots;
+
+    // shuffle options
+    const opts = [...q.opciones].sort(()=>Math.random()-.5);
+    const letters = ['A','B','C'];
+    let optsHTML = opts.map((op, i) => `
+        <button class="option-btn" onclick="responder(this, ${op.ok})" data-ok="${op.ok}">
+            <div class="opt-letter">${letters[i]}</div>
+            ${op.texto}
+        </button>
+    `).join('');
+
+    document.getElementById('view').innerHTML = `
+        <div class="slide-card anim-slideUp">
+            <div class="color-bar bar-purple"></div>
+            <div class="slide-header">
+                <div class="q-header">
+                    <div class="quiz-q-num">${S.slide+1}</div>
+                    <p class="quiz-question">${q.pregunta}</p>
+                </div>
+            </div>
+            <div class="slide-body">
+                <div class="mascot-bubble">
+                    <div class="mascot-avatar">🤖</div>
+                    <div class="mascot-text">${q.mascota}</div>
+                </div>
+                <div class="options-list" id="opts">
+                    ${optsHTML}
+                </div>
+                <div id="feedback" class="hidden"></div>
+            </div>
+        </div>
+    `;
+}
+
+/* ================================================================
+   LÓGICA QUIZ — RESPONDER
+================================================================ */
+function responder(btn, esOk) {
+    if (S.respondido) return;
+    S.respondido = true;
+    if (esOk) S.puntaje++;
+
+    // deshabilitar todos
+    document.querySelectorAll('.option-btn').forEach(b => {
+        b.disabled = true;
+        if (b.dataset.ok === 'true') {
+            b.classList.add('correct');
+        } else if (b === btn && !esOk) {
+            b.classList.add('wrong', 'anim-shake');
+        } else {
+            b.classList.add('dimmed');
         }
+    });
 
-        function renderizarPuntosProgreso() {
-            const contenedor = document.getElementById('puntos-progreso');
-            contenedor.innerHTML = diapositivas.map((_, index) => `
-                <div class="h-2.5 rounded-full transition-all duration-500 ${index === estado.slideActual ? 'w-10 bg-robot-blue shadow-sm' : 'w-2.5 bg-slate-200'}"></div>
-            `).join('');
-        }
+    // feedback
+    const fb = document.getElementById('feedback');
+    fb.className = esOk ? 'feedback-box feedback-ok anim-pop' : 'feedback-box feedback-err anim-pop';
+    fb.innerHTML = esOk
+        ? '<span class="feedback-icon">🎉</span> ¡Excelente! Respuesta correcta.'
+        : '<span class="feedback-icon">😬</span> ¡Ups! Esa no era — mira la respuesta correcta en verde.';
 
-        function actualizarBotonesNavegacion() {
-            const btnPrev = document.getElementById('btn-atras');
-            const btnSig = document.getElementById('btn-avanzar');
-            
-            btnPrev.disabled = estado.slideActual === 0;
-            
-            if (estado.slideActual === diapositivas.length - 1) {
-                btnSig.innerHTML = '¡Reiniciar Misión! <i data-lucide="rotate-ccw"></i>';
-                btnSig.className = "w-full sm:w-auto flex justify-center items-center gap-2 px-8 py-3 bg-yellow-500 text-white rounded-full font-bold hover:bg-yellow-600 shadow-lg shadow-yellow-300 hover:shadow-yellow-400 transition-all transform hover:-translate-y-0.5";
-            } else {
-                btnSig.innerHTML = '¡Avanzar! <i data-lucide="arrow-right"></i>';
-                btnSig.className = "w-full sm:w-auto flex justify-center items-center gap-2 px-8 py-3 bg-robot-blue text-white rounded-full font-bold hover:bg-blue-600 shadow-lg shadow-blue-300 hover:shadow-blue-400 transition-all transform hover:-translate-y-0.5";
-            }
-        }
+    // habilitar siguiente
+    document.getElementById('btn-next').disabled = false;
+}
 
-        // =====================================================================
-        // 4. LÓGICA E INTERACTIVIDAD (Eventos)
-        // =====================================================================
-        
-        function configurarEventos() {
-            // Navegación
-            document.getElementById('btn-avanzar').addEventListener('click', () => {
-                if (estado.slideActual < diapositivas.length - 1) {
-                    estado.slideActual++;
-                } else {
-                    estado.slideActual = 0; // Reiniciar
-                }
-                renderizarSlide();
-            });
+/* ================================================================
+   RENDER — RESULTADO
+================================================================ */
+function renderResultado() {
+    document.getElementById('counter-badge').classList.add('hidden');
+    document.getElementById('progress-bar-wrap').classList.add('hidden');
+    document.getElementById('bottom-bar').classList.add('hidden');
 
-            document.getElementById('btn-atras').addEventListener('click', () => {
-                if (estado.slideActual > 0) {
-                    estado.slideActual--;
-                    renderizarSlide();
-                }
-            });
+    const total = QUIZ.length;
+    const p = S.puntaje;
+    const pct = p / total;
+    const st = estrellas(p, total);
+    const [mascot, titulo, sub] =
+        pct === 1   ? ['🏆', '¡Perfecto! ¡Genio total!',       'Respondiste todo correcto. ¡Eres un crack del código!']
+        : pct >= .6 ? ['😎', '¡Muy bien hecho!',               'Vas por muy buen camino. ¡Sigue practicando!']
+        :             ['💪', '¡Sigue intentando!',             'No te rindas — repasa la clase y vuelve a intentarlo.'];
 
-            // Delegación de eventos para el contenido dinámico del slide
-            document.getElementById('contenedor-contenido').addEventListener('click', (e) => {
-                
-                // Evento: Revelar secreto de Arduino (Slide 2)
-                const btnArduino = e.target.closest('#btn-revelar-arduino');
-                if (btnArduino) {
-                    document.getElementById('secreto-arduino').classList.remove('oculto');
-                    btnArduino.classList.add('oculto');
-                }
+    if (pct >= .6) spawnConfetti();
 
-                // Evento: Botón Traducir Código (Slide 6)
-                const btnTraducir = e.target.closest('#btn-traducir');
-                if (btnTraducir) {
-                    estado.codigoTraducido = !estado.codigoTraducido;
-                    const real = document.getElementById('codigo-real');
-                    const humano = document.getElementById('codigo-humano');
-                    const spanTexto = btnTraducir.querySelector('span');
-                    
-                    if (estado.codigoTraducido) {
-                        real.classList.add('oculto');
-                        humano.classList.remove('oculto');
-                        spanTexto.textContent = 'Ver Código C++';
-                        btnTraducir.classList.replace('bg-emerald-500', 'bg-slate-700');
-                        btnTraducir.classList.replace('hover:bg-emerald-600', 'hover:bg-slate-600');
-                        btnTraducir.querySelector('i').setAttribute('data-lucide', 'code');
-                    } else {
-                        real.classList.remove('oculto');
-                        humano.classList.add('oculto');
-                        spanTexto.textContent = 'Traducir a Humano';
-                        btnTraducir.classList.replace('bg-slate-700', 'bg-emerald-500');
-                        btnTraducir.classList.replace('hover:bg-slate-600', 'hover:bg-emerald-600');
-                        btnTraducir.querySelector('i').setAttribute('data-lucide', 'languages');
-                    }
-                    lucide.createIcons();
-                }
+    document.getElementById('btn-menu').classList.remove('hidden');
 
-                // Evento: Opciones del Mini Reto (Slide 7)
-                const btnOpcion = e.target.closest('.opcion-test');
-                if (btnOpcion && !btnOpcion.disabled) {
-                    const contenedorOpciones = btnOpcion.closest('.contenedor-opciones');
-                    const feedback = contenedorOpciones.nextElementSibling;
-                    const esCorrecta = btnOpcion.getAttribute('data-correcta') === 'true';
+    document.getElementById('view').innerHTML = `
+        <div class="slide-card anim-slideUp">
+            <div class="color-bar bar-purple"></div>
+            <div class="result-screen">
+                <div class="result-mascot anim-bounce">${mascot}</div>
+                <h2 class="result-title">${titulo}</h2>
+                <p class="result-sub">${sub}</p>
+                <div class="score-display">
+                    <span class="score-num">${p}/${total}</span>
+                    <span class="score-label">respuestas<br>correctas</span>
+                </div>
+                <div class="result-stars">${st}</div>
+                <div class="result-btns">
+                    <button class="btn-retry" onclick="iniciar('quiz')">🔄 Volver a intentar</button>
+                    <button class="btn-go-class" onclick="iniciar('clase')">📖 Repasar la clase</button>
+                </div>
+            </div>
+        </div>
+    `;
+}
 
-                    // Deshabilitar botones de esta pregunta para evitar múltiples respuestas
-                    const botones = contenedorOpciones.querySelectorAll('.opcion-test');
-                    botones.forEach(btn => {
-                        btn.disabled = true;
-                        btn.classList.remove('hover:bg-blue-50', 'hover:border-blue-300', 'cursor-pointer');
-                        btn.classList.add('opacity-40', 'cursor-not-allowed');
-                    });
+/* ================================================================
+   NAVEGACIÓN
+================================================================ */
+function irAlMenu() {
+    S.vista = 'menu';
+    renderMenu();
+}
 
-                    // Mantener el botón clickeado visible
-                    btnOpcion.classList.remove('opacity-40');
+function iniciar(modo) {
+    S.vista = modo;
+    S.slide = 0;
+    S.puntaje = 0;
+    S.respondido = false;
+    if (modo === 'clase')     renderClase();
+    else if (modo === 'quiz') renderQuiz();
+}
 
-                    feedback.classList.remove('oculto');
+function navegar(dir) {
+    const total = S.vista === 'clase' ? SLIDES.length : QUIZ.length;
+    const sig = S.slide + dir;
+    if (sig < 0) return;
+    if (sig >= total) {
+        // terminar
+        if (S.vista === 'clase') irAlMenu();
+        else { S.vista = 'resultado'; renderResultado(); }
+        return;
+    }
+    S.slide = sig;
+    if (S.vista === 'clase')     renderClase();
+    else if (S.vista === 'quiz') renderQuiz();
+}
 
-                    if (esCorrecta) {
-                        // Estilos de éxito
-                        btnOpcion.classList.replace('bg-slate-50', 'bg-green-100');
-                        btnOpcion.classList.replace('border-slate-200', 'border-green-500');
-                        btnOpcion.classList.replace('text-slate-600', 'text-green-800');
-                        
-                        feedback.innerHTML = `<i data-lucide="check-circle" class="inline w-5 h-5 mr-1"></i> ${btnOpcion.getAttribute('data-explicacion')}`;
-                        feedback.className = "feedback-test mt-3 text-sm font-bold p-3 rounded-lg bg-green-50 text-green-700 flex items-center slide-enter border border-green-200";
-                    } else {
-                        // Estilos de error
-                        btnOpcion.classList.replace('bg-slate-50', 'bg-red-100');
-                        btnOpcion.classList.replace('border-slate-200', 'border-red-500');
-                        btnOpcion.classList.replace('text-slate-600', 'text-red-800');
-                        btnOpcion.classList.add('shake-error');
-                        
-                        feedback.innerHTML = `<i data-lucide="x-circle" class="inline w-5 h-5 mr-1"></i> ¡Ups! Esa no es la pieza correcta. Intenta recordar la clase.`;
-                        feedback.className = "feedback-test mt-3 text-sm font-bold p-3 rounded-lg bg-red-50 text-red-700 flex items-center slide-enter border border-red-200";
-                    }
-                    lucide.createIcons();
-                }
-            });
-        }
-
-        // =====================================================================
-        // 5. INICIALIZACIÓN
-        // =====================================================================
-        window.onload = () => {
-            configurarEventos();
-            renderizarSlide();
-        };
-    </script>
+/* ================================================================
+   INIT
+================================================================ */
+renderMenu();
+</script>
 </body>
 </html>
