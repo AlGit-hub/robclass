@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MacroBot Lab | Aventura Arduino</title>
+  <title>MacroBot Lab | Arduino</title>
   <style>
     :root {
       --ink: #142033;
@@ -27,6 +27,71 @@
       --dark: #182235;
       --shadow: 0 18px 55px rgba(25, 38, 60, 0.12);
       --radius: 8px;
+    }
+
+    /* =========================================
+   TEMA OSCURO
+   ========================================= */
+    [data-theme="dark"] {
+      --ink: #f8fafc;
+      --text: #cbd5e1;
+      --muted: #94a3b8;
+      --line: #334155;
+      --paper: #0f172a;
+      --soft: #1e293b;
+      --dark: #020617;
+      --shadow: 0 18px 55px rgba(0, 0, 0, 0.4);
+    }
+
+    [data-theme="dark"] .topbar,
+    [data-theme="dark"] .footer-nav {
+      background: rgba(15, 23, 42, 0.92);
+    }
+
+    [data-theme="dark"] .rule-card,
+    [data-theme="dark"] .command-row {
+      background: var(--paper);
+    }
+
+    [data-theme="dark"] body {
+      background:
+        linear-gradient(135deg, rgba(0, 143, 150, 0.06), transparent 32%),
+        linear-gradient(235deg, rgba(240, 170, 36, 0.08), transparent 28%),
+        var(--soft);
+    }
+
+    [data-theme="dark"] .panel,
+    [data-theme="dark"] .stage-panel,
+    [data-theme="dark"] .mission-card,
+    [data-theme="dark"] .mini-card,
+    [data-theme="dark"] .quiz-option,
+    [data-theme="dark"] .component-card {
+      background: var(--paper);
+      border-color: var(--line);
+    }
+
+    [data-theme="dark"] .progress-ring span {
+      background: var(--soft);
+    }
+
+    [data-theme="dark"] .ghost-btn,
+    [data-theme="dark"] .text-btn,
+    [data-theme="dark"] .pill,
+    [data-theme="dark"] .icon-btn {
+      background: var(--soft);
+      border-color: var(--line);
+      color: var(--text);
+    }
+
+    [data-theme="dark"] .route-btn {
+      background: var(--paper);
+      border-color: var(--line);
+      color: var(--text);
+    }
+
+    [data-theme="dark"] .summary-row {
+      background: var(--soft);
+      border-color: var(--line);
     }
 
     * {
@@ -1497,8 +1562,6 @@
     /* =========================================
        ANIMACIONES Y TRANSICIONES (MACROBOT LAB)
        ========================================= */
-
-    /* 1. Definición de Keyframes (La base de las animaciones) */
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
@@ -1514,13 +1577,12 @@
       to { opacity: 1; transform: translateX(0); }
     }
 
-    /* 2. Animaciones de Entrada (Al cargar o cambiar de vista) */
     .welcome {
       animation: fadeIn 0.7s ease-out forwards;
     }
 
     .stage-panel {
-      opacity: 0; /* Empieza invisible */
+      opacity: 0;
       animation: slideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
     }
 
@@ -1529,12 +1591,10 @@
       animation: slideInLeft 0.5s ease-out forwards;
     }
 
-    /* Efecto "cascada" para el menú lateral */
     .sidebar .panel:nth-child(2) {
       animation-delay: 0.15s;
     }
 
-    /* Efecto "cascada" (stagger) para las tarjetas de misiones en el Home */
     .mission-card {
       opacity: 0;
       animation: slideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
@@ -1543,26 +1603,22 @@
     .mission-card:nth-child(2) { animation-delay: 0.2s; }
     .mission-card:nth-child(3) { animation-delay: 0.3s; }
 
-    /* 3. Transiciones Interactivas (Efectos al pasar el mouse - Hover) */
     .mission-card,
     .mini-card,
     .component-card,
     .compare-box,
     .rule-card,
     .flow-card {
-      /* Una curva bezier para que el rebote se sienta natural */
       transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease;
-      will-change: transform; /* Optimización de rendimiento */
+      will-change: transform;
     }
 
-    /* Las tarjetas principales se elevan un poco más */
     .mission-card:hover {
       transform: translateY(-6px);
       box-shadow: 0 20px 40px rgba(25, 38, 60, 0.12);
       border-color: var(--accent);
     }
 
-    /* Las tarjetas secundarias tienen un efecto más sutil */
     .mini-card:hover,
     .component-card:hover,
     .compare-box:hover,
@@ -1572,12 +1628,10 @@
       box-shadow: 0 12px 25px rgba(25, 38, 60, 0.08);
     }
 
-    /* Suavizado en las opciones del quiz */
     .quiz-option {
       transition: all 0.25s ease;
     }
 
-    /* 4. Llamado a la acción (Pulso sutil para guiar al usuario) */
     @keyframes pulse {
       0% { box-shadow: 0 12px 25px rgba(0, 143, 150, 0.26), 0 0 0 0 rgba(0, 143, 150, 0.4); }
       70% { box-shadow: 0 12px 25px rgba(0, 143, 150, 0.26), 0 0 0 8px rgba(0, 143, 150, 0); }
@@ -1587,6 +1641,285 @@
     #nextBtn {
       animation: pulse 2.5s infinite;
     }
+
+    /* =========================================
+       BOXXY - ASISTENTE AUTÓNOMO
+       ========================================= */
+    .boxxy-container {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 999;
+      pointer-events: auto;
+    }
+
+    .boxxy {
+      width: 85px; 
+      height: 85px;
+      background: none; 
+      border-radius: 24px; 
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+      user-select: none;
+      animation: boxxyBounce 3.5s ease-in-out infinite; 
+    }
+
+    .boxxy:hover {
+      transform: scale(1.1) translateY(-5px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    }
+
+    @keyframes boxxyBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .boxxy-speech {
+      position: absolute;
+      bottom: 105px;
+      right: 0;
+      background: white;
+      border: 2px solid #4facfe;
+      border-radius: 12px;
+      padding: 12px 16px;
+      max-width: 220px;
+      font-size: 0.9rem;
+      color: var(--ink);
+      font-weight: 700;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      transform: translateY(10px);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+      white-space: normal;
+      word-wrap: break-word;
+    }
+
+    .boxxy-speech::after {
+      content: "";
+      position: absolute;
+      bottom: -10px;
+      right: 20px;
+      width: 0;
+      height: 0;
+      border-left: 8px solid transparent;
+      border-right: 0px solid transparent;
+      border-top: 10px solid #4facfe;
+    }
+
+    .boxxy-speech.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .boxxy-dialog {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: grid;
+      place-items: center;
+      z-index: 10000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .boxxy-dialog.is-open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .boxxy-modal {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      animation: slideUp 0.4s ease-out;
+    }
+
+    .boxxy-modal-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #4facfe;
+      padding-bottom: 12px;
+    }
+
+    .boxxy-modal-icon {
+      font-size: 2.5rem;
+    }
+
+    .boxxy-modal-title {
+      font-size: 1.3rem;
+      font-weight: 900;
+      color: var(--ink);
+      margin: 0;
+    }
+
+    .boxxy-modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: transparent;
+      border: none;
+      font-size: 1.8rem;
+      cursor: pointer;
+      color: var(--text);
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+    }
+
+    .boxxy-modal-close:hover {
+      color: var(--ink);
+    }
+
+    .boxxy-input-group {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .boxxy-input-group label {
+      font-weight: 800;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+
+    .boxxy-input-group input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      transition: border-color 0.2s ease;
+    }
+
+    .boxxy-input-group input:focus {
+      outline: none;
+      border-color: #4facfe;
+      box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+    }
+
+    .boxxy-response {
+      background: var(--soft);
+      border-left: 4px solid #4facfe;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 16px;
+      font-size: 0.9rem;
+      color: var(--text);
+      min-height: 60px;
+      display: grid;
+      align-items: center;
+    }
+
+    .boxxy-btn {
+      width: 100%;
+      padding: 12px;
+      background: #4facfe;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .boxxy-btn:hover {
+      background: #00f2fe;
+      transform: translateY(-2px);
+    }
+
+    .boxxy-btn:active {
+      transform: translateY(0);
+    }
+
+    /* =========================================
+       BOXXY 2.0 - SVG HEAD & ANIMATIONS
+       ========================================= */
+    #boxxy-svg-container {
+      position: relative;
+      width: 85px;
+      height: 85px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #boxxyHead {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+    }
+
+    .boxxy-eye {
+      transform-origin: center;
+      transform-box: fill-box;
+      will-change: transform;
+    }
+
+    .led-glow {
+      animation: ledPulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes ledPulse {
+      0%, 100% { opacity: 1; filter: drop-shadow(0 0 4px rgba(79, 172, 254, 0.6)); }
+      50% { opacity: 0.8; filter: drop-shadow(0 0 8px rgba(79, 172, 254, 0.9)); }
+    }
+
+    @keyframes eyeBlink {
+      0%, 90%, 100% { transform: scaleY(1); }
+      95% { transform: scaleY(0.1); }
+    }
+
+    @keyframes floatSmooth {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .boxxy-blinking {
+      animation: eyeBlink 0.4s ease-in-out forwards;
+    }
+
+    .boxxy-floating {
+      animation: floatSmooth 3.5s ease-in-out infinite;
+    }
+
+    @keyframes faceHappy {
+      0% { opacity: 0; }
+      50% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    .boxxy-happy {
+      animation: faceHappy 0.6s ease-out forwards;
+    }
+
+    .boxxy-sad {
+      animation: faceHappy 0.6s ease-out forwards;
+    }
+
+    @keyframes inactivityAlert {
+      0%, 100% { fill: #4facfe; }
+      50% { fill: #f05d45; }
+    }
+
+    .boxxy-alert {
+      animation: inactivityAlert 0.8s ease-in-out infinite;
+    }
+
     /* =========================================
        PANTALLA DE BIENVENIDA (SPLASH SCREEN)
        ========================================= */
@@ -1601,7 +1934,6 @@
       transition: opacity 0.6s ease, visibility 0.6s ease;
     }
 
-    /* Clase que añadiremos con JavaScript para ocultarla */
     .splash-screen.is-hidden {
       opacity: 0;
       visibility: hidden;
@@ -1614,7 +1946,6 @@
       gap: 20px;
       justify-items: center;
       padding: 24px;
-      /* Reutiliza la animación slideUp del paso anterior */
       animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
     }
 
@@ -1648,8 +1979,8 @@
       padding: 0 35px;
       height: 54px;
       font-size: 1.15rem;
-      border-radius: 999px; /* Botón en forma de píldora */
-      animation: pulse 2.5s infinite; /* Reutiliza el pulso */
+      border-radius: 999px;
+      animation: pulse 2.5s infinite;
     }
   </style>
 </head>
@@ -1674,9 +2005,10 @@
         </div>
         <div class="top-actions">
           <div id="progressPill" class="pill">Ruta sin iniciar</div>
-          <button class="ghost-btn" data-action="resetProgress">Reiniciar avance</button>
-          <button class="icon-btn" data-action="home" title="Inicio" aria-label="Inicio">🏠</button>  
-        </div>
+            <button class="ghost-btn" data-action="resetProgress">Reiniciar avance</button>
+            <button id="themeToggleBtn" class="icon-btn" data-action="toggleTheme" title="Cambiar tema" aria-label="Cambiar tema">🌙</button>  
+             <button class="icon-btn" data-action="home" title="Inicio" aria-label="Inicio">🏠</button>  
+          </div>
       </div>
     </header>
 
@@ -1698,6 +2030,61 @@
   </div>
 
   <div id="confettiLayer" aria-hidden="true"></div>
+
+  <div class="boxxy-container">
+    <div id="boxxy" class="boxxy boxxy-floating" title="Haz clic para hacer preguntas">
+      <div id="boxxy-svg-container">
+        <svg id="boxxyHead" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="headGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#4facfe;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#00f2fe;stop-opacity:1" />
+            </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
+          
+          <rect x="10" y="15" width="80" height="70" rx="25" ry="25" fill="url(#headGradient)" filter="url(#glow)"/>
+          
+          <circle cx="28" cy="55" r="6" fill="#ff9999" opacity="0.6"/>
+          <circle cx="72" cy="55" r="6" fill="#ff9999" opacity="0.6"/>
+
+          <circle class="boxxy-eye left-eye led-glow" cx="35" cy="42" r="10" fill="#ffffff"/>
+          <circle class="boxxy-eye left-eye-pupil" cx="35" cy="42" r="5" fill="#142033"/>
+          <circle cx="33" cy="40" r="2" fill="#ffffff"/> <circle class="boxxy-eye right-eye led-glow" cx="65" cy="42" r="10" fill="#ffffff"/>
+          <circle class="boxxy-eye right-eye-pupil" cx="65" cy="42" r="5" fill="#142033"/>
+          <circle cx="63" cy="40" r="2" fill="#ffffff"/> <path id="boxxy-mouth" d="M 42 62 Q 50 68 58 62" stroke="#ffffff" stroke-width="3" fill="none" stroke-linecap="round"/>
+          
+          <line x1="50" y1="15" x2="50" y2="5" stroke="#4facfe" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="50" cy="4" r="4" fill="#ffdd55"/>
+        </svg>
+      </div>
+    </div>
+    <div id="boxxySpeech" class="boxxy-speech"></div>
+  </div>
+
+  <div id="boxxyChatDialog" class="boxxy-dialog">
+    <div class="boxxy-modal">
+      <button id="boxxyCloseBtn" class="boxxy-modal-close">&times;</button>
+      <div class="boxxy-modal-header">
+        <span class="boxxy-modal-icon">🤖</span>
+        <h2 class="boxxy-modal-title">Boxxy - Asistente</h2>
+      </div>
+      <div class="boxxy-input-group">
+        <label for="boxxyQuestion">¿Tienes una pregunta?</label>
+        <input type="text" id="boxxyQuestion" placeholder="Escribe tu pregunta aquí..." />
+      </div>
+      <div id="boxxyResponse" class="boxxy-response" style="display: none;">
+        <p id="boxxyResponseText"></p>
+      </div>
+      <button id="boxxySendBtn" class="boxxy-btn">Enviar Pregunta</button>
+    </div>
+  </div>
 
   <script>
     const MODULES = [
@@ -2051,6 +2438,13 @@
       puzzle: [],
       progress: loadProgress()
     };
+    // Cargar el tema guardado
+      const savedTheme = localStorage.getItem("macrobotTheme") || "light";
+      document.documentElement.setAttribute("data-theme", savedTheme);
+      const themeToggleBtn = document.getElementById("themeToggleBtn");
+      if (themeToggleBtn) {
+       themeToggleBtn.textContent = savedTheme === "dark" ? "☀️" : "🌙";
+}
 
     const stage = document.getElementById("stage");
     const sidebar = document.getElementById("sidebar");
@@ -3013,6 +3407,15 @@ Repetir siempre:
         clearBlinkTimer();
         renderHome();
       }
+      if (action === "toggleTheme") {
+        const currentTheme = document.documentElement.getAttribute("data-theme");
+        const newTheme = currentTheme === "dark" ? "light" : "dark";
+        
+        document.documentElement.setAttribute("data-theme", newTheme);
+        localStorage.setItem("macrobotTheme", newTheme);
+        
+        target.textContent = newTheme === "dark" ? "☀️" : "🌙";
+      }
     }
 
     function handleInput(event) {
@@ -3025,11 +3428,445 @@ Repetir siempre:
       }
     }
 
+    // =========================================
+    // BOXXY - Sistema del Asistente Autónomo
+    // =========================================
+
+    const boxxyState = {
+      messages: {
+        home: [
+          "Hola soy Boxxy tu asistente de clase",
+          "¡Bienvenido a MacroBot Lab!",
+          "Estoy aquí para ayudarte en tu aventura"
+        ],
+        lesson: [
+          "Esto es muy importante",
+          "Que no se te olvide",
+          "Presta atención a este concepto",
+          "Esto es fundamental"
+        ],
+        lab: [
+          "Dale, pruébalo",
+          "Hazlo sin miedo",
+          "¡Vamos, tú puedes!",
+          "Experimenta y aprende"
+        ],
+        quiz_correct: [
+          "Que bien",
+          "Excelente",
+          "Lo entendiste bien",
+          "¡Muy bien! 👏"
+        ],
+        quiz_wrong: [
+          "Nogh!",
+          "Oye, eso estaba en la clase",
+          "Lo olvidaste?",
+          "Repasemos eso"
+        ]
+      },
+      messageTimeout: null,
+      position: { x: 30, y: 30 },
+      targetPosition: { x: 30, y: 30 }
+    };
+
+    function getRandomMessage(type) {
+      const messages = boxxyState.messages[type] || [];
+      return messages[Math.floor(Math.random() * messages.length)] || "Hola";
+    }
+
+    function showBoxxySpeech(message, duration = 3000) {
+      const speechBubble = document.getElementById("boxxySpeech");
+      if (!speechBubble) return;
+      
+      speechBubble.textContent = message;
+      speechBubble.classList.add("is-visible");
+      
+      clearTimeout(boxxyState.messageTimeout);
+      boxxyState.messageTimeout = setTimeout(() => {
+        speechBubble.classList.remove("is-visible");
+      }, duration);
+    }
+
+    // CORRECCIÓN APLICADA: Función de movimiento reactivada
+    function moveBoxxy() {
+      const boxxy = document.getElementById("boxxy");
+      if (!boxxy) return;
+      
+      let viewType = state.view;
+      const maxX = window.innerWidth - 100;
+      const maxY = window.innerHeight - 100;
+      
+      if (viewType === "home") {
+        boxxyState.targetPosition = { x: maxX * 0.7, y: maxY * 0.3 };
+      } else if (viewType === "lesson") {
+        boxxyState.targetPosition = { x: maxX * 0.5, y: maxY * 0.7 };
+      } else if (viewType === "lab") {
+        boxxyState.targetPosition = { x: maxX * 0.8, y: maxY * 0.4 };
+      } else if (viewType === "quiz") {
+        boxxyState.targetPosition = { x: maxX * 0.2, y: maxY * 0.6 };
+      }
+      
+      boxxyState.targetPosition.x = Math.max(30, Math.min(boxxyState.targetPosition.x, maxX));
+      boxxyState.targetPosition.y = Math.max(30, Math.min(boxxyState.targetPosition.y, maxY));
+      
+      const dx = boxxyState.targetPosition.x - boxxyState.position.x;
+      const dy = boxxyState.targetPosition.y - boxxyState.position.y;
+      
+      if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
+        boxxyState.position.x += dx * 0.1;
+        boxxyState.position.y += dy * 0.1;
+      } else {
+        boxxyState.position.x = boxxyState.targetPosition.x;
+        boxxyState.position.y = boxxyState.targetPosition.y;
+      }
+      
+      const container = document.querySelector(".boxxy-container");
+      if (container) {
+        container.style.right = (window.innerWidth - boxxyState.position.x - 40) + "px";
+        container.style.bottom = (window.innerHeight - boxxyState.position.y - 40) + "px";
+      }
+    }
+
+    function updateBoxxyContext() {
+      const view = state.view;
+      
+      if (view === "home") {
+        showBoxxySpeech(getRandomMessage("home"), 2000);
+      } else if (view === "lesson") {
+        showBoxxySpeech(getRandomMessage("lesson"), 2500);
+      } else if (view === "lab") {
+        showBoxxySpeech(getRandomMessage("lab"), 2500);
+      }
+    }
+
+    function reactToQuizAnswer(isCorrect) {
+      const messageType = isCorrect ? "quiz_correct" : "quiz_wrong";
+      const message = getRandomMessage(messageType);
+      
+      const boxxy = document.getElementById("boxxy");
+      if (boxxy) {
+        if (isCorrect) {
+          updateBoxxyEyes("happy");
+          boxxy.classList.add("boxxy-happy");
+          setTimeout(() => { 
+            boxxy.classList.remove("boxxy-happy");
+            updateBoxxyEyes("neutral");
+          }, 1500);
+          
+          // CORRECCIÓN APLICADA: Llama a la función correcta de confeti
+          if (state.view === "quiz") spawnConfetti();
+        } else {
+          updateBoxxyEyes("sad");
+          boxxy.classList.add("boxxy-sad");
+          setTimeout(() => { 
+            boxxy.classList.remove("boxxy-sad");
+            updateBoxxyEyes("neutral");
+          }, 1500);
+        }
+      }
+      
+      showBoxxySpeech(message, 2500);
+    }
+
+// Cerebro de IA: Conexión con Ollama
+    async function askBoxxyAI(question) {
+      try {
+        const response = await fetch("http://localhost:11434/api/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "gemma2", 
+            prompt: `Eres Boxxy, un robot asistente, divertido y empático, para niños de sexto grado que están aprendiendo electrónica y robótica. Responde de forma muy clara, amigable y en un máximo de 2 oraciones a esta duda: ${question}`,
+            stream: false
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Error HTTP: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        saveConversation(question, data.response);
+        return data.response;
+        
+      } catch (error) {
+        console.error("Boxxy AI Error:", error); // Revisa la consola con F12 si vuelve a fallar
+        
+        // Fallback: Si Ollama no responde, usa el sistema preprogramado mejorado
+        const context = {
+          view: state.view,
+          module: MODULES[state.moduleIndex]?.title || "inicio",
+          step: state.step
+        };
+        const fallbackResponse = generateContextualResponse(question, context);
+        saveConversation(question, fallbackResponse);
+        return fallbackResponse;
+      }
+    }
+
+    function generateContextualResponse(question, context) {
+      const q = question.toLowerCase()
+                        .normalize("NFD")
+                        .replace(/[\u0300-\u036f]/g, "")
+                        .replace(/[¿?¡!.,]/g, "");
+      
+      // Diccionario 
+      const keywords = {
+        "hola": "¡Hola! Soy Boxxy. ¿En qué parte del circuito o del código te puedo ayudar hoy?",
+        "quien eres": "Soy Boxxy, el asistente inteligente de MacroBot Lab. ¡Estoy aquí para ayudarte a construir cosas geniales!",
+        "protoboard": "La protoboard es una tabla llena de agujeritos conectada por dentro. Sirve para armar y probar circuitos sin tener que soldar los cables.",
+        "arduino": "Arduino es como el cerebro de nuestro robot. Le conectamos sensores para que sienta, y le damos código para que piense y actúe.",
+        "robot": "¡Un robot es una máquina que armaremos juntos! Necesitará un cerebro (Arduino), energía, y código para saber qué hacer.",
+        "setup": "En Arduino, setup() prepara la placa una sola vez al iniciar. Aquí le decimos quién es entrada y quién es salida usando pinMode().",
+        "loop": "loop() es el corazón de tu código. Todo lo que escribas dentro de esas llaves se repetirá infinitamente.",
+        "led": "Un LED es un diodo que emite luz. Tiene lado positivo (pata larga) y negativo (pata corta). ¡No olvides protegerlo con una resistencia!",
+        "resistencia": "La resistencia es nuestro escudo. Limita la fuerza de la corriente eléctrica para que componentes como el LED no se quemen.",
+        "error": "¡No te frustres! Si hay un error, como un semáforo rojo, revisa si te falta un punto y coma (;) al final o si olvidaste cerrar una llave {}.",
+        "pin": "Los pines numéricos (0-13) envían o reciben señales. Es como conectar un cable a un interruptor específico de Arduino.",
+        "gnd": "GND significa Ground o Tierra. Es el polo negativo al que toda la electricidad debe llegar para cerrar el círculo del circuito.",
+        "boton": "Para leer un botón usamos digitalRead(). Recuerda que HIGH significa que lo estás presionando, y LOW que está suelto.",
+        "pulsador": "Para leer un botón usamos digitalRead(). Recuerda que HIGH significa presionado y LOW suelto.",
+        "gracias": "¡De nada! Recuerda que equivocarse es parte de ser un gran inventor. ¿Seguimos?"
+      };
+      
+      for (const [key, answer] of Object.entries(keywords)) {
+        if (q.includes(key)) {
+          return answer;
+        }
+      }
+      
+      // Respuestas genéricas por pantalla
+      if (context.view === "lesson") {
+        return `Buena pregunta sobre el módulo de ${context.module}. Fíjate en la sección "Idea clave" en pantalla. ¿Tienes dudas con algún comando específico?`;
+      } else if (context.view === "lab") {
+        return "En el laboratorio lo importante es probar. Si el circuito no funciona, verifica siempre que el cable GND esté conectado.";
+      } else if (context.view === "quiz") {
+        return "Estás en pleno Quiz, trata de recordar las reglas de oro. ¡Tú puedes!";
+      }
+      
+      return "Hmm, mis circuitos están pensando en eso... Prueba preguntarme sobre qué es Arduino, la protoboard, o cómo prender un LED.";
+    }
+
+    // ========================================
+    // BOXXY 2.0: SVG Eye & Animation System
+    // ========================================
+    let boxxyState2 = {
+      mouseX: window.innerWidth / 2,
+      mouseY: window.innerHeight / 2,
+      blinkTimer: null,
+      inactivityTimer: null,
+      lastInteraction: Date.now(),
+      eyeState: "neutral",
+      conversationHistory: [],
+      hintAttempts: {},
+      maxHints: 3
+    };
+
+    function updateBoxxyEyes(state) {
+      const leftPupil = document.querySelector(".left-eye-pupil");
+      const rightPupil = document.querySelector(".right-eye-pupil");
+      const mouth = document.getElementById("boxxy-mouth");
+      
+      if (!leftPupil || !rightPupil || !mouth) return;
+
+      if (state === "happy") {
+        mouth.setAttribute("d", "M 42 62 Q 50 72 58 62");
+        leftPupil.setAttribute("fill", "#00ff00");
+        rightPupil.setAttribute("fill", "#00ff00");
+      } else if (state === "sad") {
+        mouth.setAttribute("d", "M 42 66 Q 50 60 58 66");
+        leftPupil.setAttribute("fill", "#ff6b6b");
+        rightPupil.setAttribute("fill", "#ff6b6b");
+      } else if (state === "alert") {
+        mouth.setAttribute("d", "M 42 62 Q 50 68 58 62");
+        leftPupil.setAttribute("fill", "#ffa500");
+        rightPupil.setAttribute("fill", "#ffa500");
+      } else {
+        mouth.setAttribute("d", "M 42 62 Q 50 68 58 62");
+        leftPupil.setAttribute("fill", "#142033");
+        rightPupil.setAttribute("fill", "#142033");
+      }
+      boxxyState2.eyeState = state;
+    }
+
+    function trackMouseMovement() {
+      document.addEventListener("mousemove", (e) => {
+        boxxyState2.mouseX = e.clientX;
+        boxxyState2.mouseY = e.clientY;
+        boxxyState2.lastInteraction = Date.now();
+        
+        const boxxyElement = document.getElementById("boxxy");
+        if (!boxxyElement) return;
+        
+        const rect = boxxyElement.getBoundingClientRect();
+        const boxxyX = rect.left + rect.width / 2;
+        const boxxyY = rect.top + rect.height / 2;
+        
+        const angle = Math.atan2(e.clientY - boxxyY, e.clientX - boxxyX);
+        const distance = 2;
+        
+        const leftEye = document.querySelector(".left-eye-pupil");
+        const rightEye = document.querySelector(".right-eye-pupil");
+        
+        if (leftEye && rightEye) {
+          const offsetX = Math.cos(angle) * distance;
+          const offsetY = Math.sin(angle) * distance;
+          
+          leftEye.setAttribute("cx", 35 + offsetX);
+          leftEye.setAttribute("cy", 42 + offsetY);
+          rightEye.setAttribute("cx", 65 + offsetX);
+          rightEye.setAttribute("cy", 42 + offsetY);
+        }
+      });
+    }
+
+    function automaticBlink() {
+      const performBlink = () => {
+        const eyes = document.querySelectorAll(".boxxy-eye");
+        eyes.forEach(eye => {
+          eye.classList.add("boxxy-blinking");
+          setTimeout(() => {
+            eye.classList.remove("boxxy-blinking");
+          }, 400);
+        });
+        
+        boxxyState2.blinkTimer = setTimeout(performBlink, 3000 + Math.random() * 4000);
+      };
+      
+      boxxyState2.blinkTimer = setTimeout(performBlink, 3000);
+    }
+
+    function inactivityDetection() {
+      const checkInactivity = () => {
+        const now = Date.now();
+        const timeSinceInteraction = now - boxxyState2.lastInteraction;
+        
+        if (timeSinceInteraction > 300000) { 
+          if (boxxyState2.eyeState !== "alert") {
+            updateBoxxyEyes("alert");
+            showBoxxySpeech("¿Necesitas ayuda? Escríbeme si tienes dudas", 4000);
+          }
+        }
+      };
+      
+      boxxyState2.inactivityTimer = setInterval(checkInactivity, 30000);
+    }
+
+    function saveConversation(question, answer) {
+      boxxyState2.conversationHistory.push({
+        question,
+        answer,
+        timestamp: Date.now(),
+        module: state.view,
+        lesson: state.step
+      });
+      
+      const history = JSON.parse(localStorage.getItem('boxxyHistory') || '[]');
+      history.push({ question, answer, timestamp: Date.now() });
+      if (history.length > 10) history.shift();
+      localStorage.setItem('boxxyHistory', JSON.stringify(history));
+    }
+
+    // Event listeners para Boxxy
+    const boxxyElement = document.getElementById("boxxy");
+    const boxxyChatDialog = document.getElementById("boxxyChatDialog");
+    const boxxyCloseBtn = document.getElementById("boxxyCloseBtn");
+    const boxxySendBtn = document.getElementById("boxxySendBtn");
+    const boxxyQuestion = document.getElementById("boxxyQuestion");
+    const boxxyResponse = document.getElementById("boxxyResponse");
+    const boxxyResponseText = document.getElementById("boxxyResponseText");
+
+    if (boxxyElement) {
+      boxxyElement.addEventListener("click", () => {
+        boxxyChatDialog.classList.add("is-open");
+        boxxyQuestion.focus();
+      });
+    }
+
+    if (boxxyCloseBtn) {
+      boxxyCloseBtn.addEventListener("click", () => {
+        boxxyChatDialog.classList.remove("is-open");
+        boxxyResponse.style.display = "none";
+      });
+    }
+
+    boxxyChatDialog.addEventListener("click", (e) => {
+      if (e.target === boxxyChatDialog) {
+        boxxyChatDialog.classList.remove("is-open");
+        boxxyResponse.style.display = "none";
+      }
+    });
+
+    if (boxxySendBtn) {
+      boxxySendBtn.addEventListener("click", async () => {
+        const question = boxxyQuestion.value.trim();
+        if (!question) {
+          boxxyResponseText.textContent = "Por favor, escribe una pregunta.";
+          boxxyResponse.style.display = "block";
+          return;
+        }
+        
+        boxxySendBtn.disabled = true;
+        boxxySendBtn.textContent = "Pensando...";
+        
+        const answer = await askBoxxyAI(question);
+        
+        boxxyResponseText.textContent = answer;
+        boxxyResponse.style.display = "block";
+        boxxyQuestion.value = "";
+        
+        boxxySendBtn.disabled = false;
+        boxxySendBtn.textContent = "Enviar Pregunta";
+      });
+    }
+
+    if (boxxyQuestion) {
+      boxxyQuestion.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          boxxySendBtn.click();
+        }
+      });
+    }
+
+    // Inicializar sistemas de Boxxy 2.0
+    trackMouseMovement();
+    automaticBlink();
+    inactivityDetection();
+
+    // CORRECCIÓN APLICADA: Se vuelve a activar el movimiento general
+    setInterval(() => {
+      moveBoxxy();
+    }, 50);
+
+    const originalRenderHome = renderHome;
+    const originalRenderLesson = renderLesson;
+    const originalRenderLab = startLab;
+    const originalRenderQuiz = startQuiz;
+
+    renderHome = function() {
+      originalRenderHome.call(this);
+      setTimeout(() => updateBoxxyContext(), 300);
+    };
+
+    renderLesson = function() {
+      originalRenderLesson.call(this);
+      setTimeout(() => updateBoxxyContext(), 300);
+    };
+
+    const originalAnswerQuestion = answerQuestion;
+    answerQuestion = function(index) {
+      const mod = getModule();
+      const quiz = mod.quiz;
+      const option = quiz[state.step]?.options[index];
+      
+      reactToQuizAnswer(option?.ok || false);
+      originalAnswerQuestion.call(this, index);
+    };
+
     // Eventos Globales
     document.addEventListener("click", handleClick);
     document.addEventListener("input", handleInput);
-    
-    // Eventos para el botón interactivo del Laboratorio 3
+     
     document.addEventListener("pointerdown", handleBtnPress);
     document.addEventListener("pointerup", handleBtnRelease);
     document.addEventListener("pointerleave", handleBtnRelease);
