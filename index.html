@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MacroBot Lab | Arduino</title>
+  <title>MacroBot Lab | Arduino y Controladores</title>
   <style>
     :root {
       --ink: #142033;
@@ -778,6 +778,12 @@
     .flow-grid {
       grid-template-columns: repeat(3, minmax(0, 1fr));
       align-items: stretch;
+    }
+
+    /* FIX: Cuando flow-grid está dentro del panel lateral de ayudas, se apila verticalmente para dar espacio al texto */
+    .visual-board .flow-grid {
+      grid-template-columns: 1fr !important;
+      gap: 8px;
     }
 
     .compare-box {
@@ -1602,6 +1608,7 @@
     .mission-card:nth-child(1) { animation-delay: 0.1s; }
     .mission-card:nth-child(2) { animation-delay: 0.2s; }
     .mission-card:nth-child(3) { animation-delay: 0.3s; }
+    .mission-card:nth-child(4) { animation-delay: 0.4s; }
 
     .mission-card,
     .mini-card,
@@ -2081,6 +2088,8 @@
       </div>
       <div id="boxxyResponse" class="boxxy-response" style="display: none;">
         <p id="boxxyResponseText"></p>
+      <div class="boxxy-container" style="display: none;">
+  <div id="boxxy" class="boxxy boxxy-floating" title="Haz clic para hacer preguntas">
       </div>
       <button id="boxxySendBtn" class="boxxy-btn">Enviar Pregunta</button>
     </div>
@@ -2152,7 +2161,7 @@
           {
             question: "¿Qué hace la parte del código llamada void setup()?",
             hint: "Se ejecuta al inicio.",
-            explanation: "setup() prepara herramientas, pines y condiciones iniciales. Se lee una sola vez al prender la placa.",
+            explanation: "setup() prepara herramientas, pines and condiciones iniciales. Se lee una sola vez al prender la placa.",
             options: [
               { text: "Repite las instrucciones sin parar.", ok: false },
               { text: "Prepara las herramientas y se lee una sola vez al prender.", ok: true },
@@ -2418,6 +2427,125 @@
             ]
           }
         ]
+      },
+      {
+        id: "controladores",
+        title: "Módulo 4: El Universo de los Controladores",
+        shortTitle: "Controladores",
+        icon: "04",
+        accent: "#f0aa24",
+        accentSoft: "#fff4d8",
+        tagline: "Microcontroladores, microprocesadores y sus súper poderes.",
+        goals: [
+          "Diferenciar un microcontrolador de un microprocesador.",
+          "Conocer Arduino, ESP32, Micro:bit, STM32 y Raspberry Pi.",
+          "Identificar qué tarjeta usar según el tipo de proyecto."
+        ],
+        lessons: [
+          {
+            title: "Cerebros vs Computadoras",
+            eyebrow: "Concepto Clave",
+            subtitle: "Microcontrolador vs Microprocesador.",
+            coach: "Antes de ver las diferentes placas, es vital entender la diferencia de fuerzas.",
+            key: "Un Microcontrolador (MCU) hace tareas específicas y repetitivas muy bien. Un Microprocesador (SBC) es una computadora completa que maneja múltiples tareas y Sistemas Operativos.",
+            type: "mcu_vs_sbc"
+          },
+          {
+            title: "Educación y Prototipado",
+            eyebrow: "Tarjetas Base",
+            subtitle: "Las reinas del aprendizaje.",
+            coach: "Si estás empezando a aprender lógica o quieres un prototipo rápido sin conexión a internet, estas son tus mejores amigas.",
+            key: "Arduino UNO no tiene internet nativo pero es indestructible. Micro:bit es muy visual e incluye sensores en la propia placa.",
+            type: "board_cards",
+            board1: { title: "Arduino UNO", desc: "El clásico de 8 bits. Comunidad gigante, ideal para automatización y robótica básica." },
+            board2: { title: "Micro:bit", desc: "Placa educativa por excelencia. Trae matriz LED, brújula y botones integrados listos para usar." }
+          },
+          {
+            title: "Conexión e Industria",
+            eyebrow: "Avanzado",
+            subtitle: "Cuando necesitas poder o internet.",
+            coach: "Aquí la cosa se pone seria. Dejamos los 8 bits y pasamos a arquitecturas de 32 bits mucho más veloces.",
+            key: "ESP32 es el rey del Internet de las Cosas (IoT). STM32 es el estándar para dispositivos industriales por su altísima precisión.",
+            type: "board_cards",
+            board1: { title: "ESP32", desc: "NUESTRO PRÓXIMO PASO. Trae Wi-Fi y Bluetooth nativos, doble núcleo y velocidad abismal." },
+            board2: { title: "STM32", desc: "El estándar de la industria. Ofrece gran cantidad de periféricos y confiabilidad máxima." }
+          },
+          {
+            title: "La Mini Computadora",
+            eyebrow: "SBC",
+            subtitle: "Raspberry Pi.",
+            coach: "No la uses solo para encender un LED, úsala cuando necesites el poder de una computadora real.",
+            key: "Es un equipo completo. Ejecuta Linux o Windows, maneja bases de datos locales y algoritmos de Inteligencia Artificial.",
+            type: "board_cards",
+            board1: { title: "Raspberry Pi", desc: "Procesamiento multimedia, visión por computadora, puertos USB y HDMI nativos." },
+            board2: { title: "Uso ideal", desc: "Centros de entretenimiento, servidores caseros y robótica avanzada con IA." }
+          },
+          {
+            title: "El Gran Salto al ESP32",
+            eyebrow: "Transición",
+            subtitle: "Prepárate para conectar tus circuitos al mundo.",
+            coach: "Dominamos la lógica con Arduino. Ahora aplicaremos ese conocimiento aprovechando el Wi-Fi del ESP32 para enviar y recibir datos en tiempo real.",
+            key: "El mundo moderno está conectado. Entender el ESP32 te abre las puertas definitivas a la domótica y los servidores embebidos.",
+            type: "transition"
+          }
+        ],
+        lab: {
+          title: "Misión de Selección",
+          subtitle: "Identifica el controlador correcto para el problema.",
+          type: "scenario"
+        },
+        quiz: [
+          {
+            question: "¿Cuál es la principal diferencia entre un Microcontrolador y un Microprocesador?",
+            hint: "Piensa en el nivel de complejidad que pueden manejar.",
+            explanation: "El microcontrolador está dedicado a tareas de control específicas sin un sistema operativo complejo, mientras que el microprocesador maneja múltiples tareas bajo un SO completo.",
+            options: [
+              { text: "El microcontrolador usa Linux y el microprocesador usa Windows.", ok: false },
+              { text: "El microcontrolador hace tareas específicas y el microprocesador es una computadora completa multitarea.", ok: true },
+              { text: "No hay ninguna diferencia, son lo mismo.", ok: false }
+            ]
+          },
+          {
+            question: "Quieres construir un sistema que envíe datos a una página web por Wi-Fi. ¿Cuál es tu mejor opción?",
+            hint: "Busca la tarjeta con conectividad nativa (IoT).",
+            explanation: "El ESP32 es ideal para el Internet de las Cosas porque trae Wi-Fi y Bluetooth integrados en el propio chip.",
+            options: [
+              { text: "Arduino UNO", ok: false },
+              { text: "ESP32", ok: true },
+              { text: "Micro:bit", ok: false }
+            ]
+          },
+          {
+            question: "¿Por qué destaca la tarjeta Micro:bit en el entorno educativo?",
+            hint: "Revisa qué trae incorporado en la placa.",
+            explanation: "Viene armada hasta los dientes con sensores internos, una matriz LED y botones, permitiendo hacer proyectos sin necesidad de conectar cosas externas.",
+            options: [
+              { text: "Porque ya trae matriz LED, botones y sensores integrados.", ok: true },
+              { text: "Porque es la única que funciona con baterías.", ok: false },
+              { text: "Porque puede ejecutar juegos pesados de computadora.", ok: false }
+            ]
+          },
+          {
+            question: "Anhelas un proyecto de Inteligencia Artificial o procesamiento pesado de imágenes con cámaras. ¿Qué usarías?",
+            hint: "Es una SBC, una computadora completa.",
+            explanation: "Al ser un microprocesador completo, la Raspberry Pi es idónea para visión artificial, servidores y algoritmos avanzados.",
+            options: [
+              { text: "Para prender un solo LED.", ok: false },
+              { text: "Para armar un semáforo sencillo.", ok: false },
+              { text: "Para proyectos de Inteligencia Artificial y servidores web pesados.", ok: true }
+            ]
+          },
+          {
+            question: "¿Cuál de estas tarjetas es conocida como el estándar industrial por su altísima precisión y bajo costo en masa?",
+            hint: "Es la de 32 bits de arquitectura ARM.",
+            explanation: "La STM32 domina el mercado comercial e industrial cuando se requiere extrema fiabilidad y manejo de muchos periféricos a bajo costo.",
+            options: [
+              { text: "STM32", ok: true },
+              { text: "Arduino UNO", ok: false },
+              { text: "Raspberry Pi", ok: false }
+            ]
+          }
+        ]
       }
     ];
 
@@ -2436,9 +2564,10 @@
       blinkTimer: null,
       blinkDelay: 1000,
       puzzle: [],
+      boardLabDone: false,
       progress: loadProgress()
     };
-    // Cargar el tema guardado
+    
       const savedTheme = localStorage.getItem("macrobotTheme") || "light";
       document.documentElement.setAttribute("data-theme", savedTheme);
       const themeToggleBtn = document.getElementById("themeToggleBtn");
@@ -2643,6 +2772,7 @@
       state.moduleIndex = moduleIndex;
       state.step = 0;
       state.puzzle = [];
+      state.boardLabDone = false;
       state.blinkRunning = false;
       renderLab();
     }
@@ -2738,6 +2868,47 @@
               <h3>Condición Falsa</h3>
               <p>Si la respuesta es no, Arduino ignora el 'if' y ejecuta el código del 'else'.</p>
             </div>
+          </div>
+        `;
+      }
+
+      if (lesson.type === "mcu_vs_sbc") {
+        return `
+          <div class="comparison-grid" style="margin-top:14px">
+            <div class="compare-box">
+              <code>Microcontrolador (MCU)</code>
+              <h3>El Trabajador Dedicado</h3>
+              <p>Chip "todo en uno" diseñado para tareas específicas y repetitivas (leer sensor, mover motor). No usa Sistema Operativo.</p>
+            </div>
+            <div class="compare-box">
+              <code>Microprocesador (SBC)</code>
+              <h3>El Cerebro Multitarea</h3>
+              <p>Computadora completa. Necesita memoria externa y Sistema Operativo (Linux/Windows) para funcionar y maneja multitarea compleja.</p>
+            </div>
+          </div>
+        `;
+      }
+
+      if (lesson.type === "board_cards") {
+        return `
+          <div class="component-grid" style="margin-top:14px">
+            <div class="component-card" style="border-left: 4px solid var(--accent);">
+              <h3>${lesson.board1.title}</h3>
+              <p>${lesson.board1.desc}</p>
+            </div>
+            <div class="component-card" style="border-left: 4px solid var(--muted);">
+              <h3>${lesson.board2.title}</h3>
+              <p>${lesson.board2.desc}</p>
+            </div>
+          </div>
+        `;
+      }
+
+      if (lesson.type === "transition") {
+        return `
+          <div class="flow-card" style="margin-top:14px; padding: 24px; border: 2px solid var(--accent); background: var(--accent-soft);">
+            <strong style="font-size: 1.4rem;">🚀 ¡Siguiente Nivel Desbloqueado!</strong>
+            <p style="font-size: 1.05rem; font-weight: 700; color: var(--ink);">Nos despedimos del Arduino Uno local y comenzamos nuestra aventura de conexión con el ESP32 y el Internet de las Cosas.</p>
           </div>
         `;
       }
@@ -2843,13 +3014,39 @@
         `;
       }
 
-      if (type === "anatomy") {
+      if (type === "anatomy" || type === "mcu_vs_sbc") {
+        const isAnatomy = type === "anatomy";
         return `
           <div class="visual-board">
             <div class="flow-grid" style="width:100%">
-              <div class="flow-card"><strong>1</strong><p>Encender placa</p></div>
-              <div class="flow-card"><strong>setup()</strong><p>Preparar pines y herramientas</p></div>
-              <div class="flow-card"><strong>loop()</strong><p>Repetir instrucciones</p></div>
+              <div class="flow-card"><strong>${isAnatomy ? '1' : 'MCU'}</strong><p>${isAnatomy ? 'Encender placa' : 'Microcontrolador<br>(Foco y Velocidad)'}</p></div>
+              <div class="flow-card"><strong>${isAnatomy ? 'setup()' : 'VS'}</strong><p>${isAnatomy ? 'Preparar pines y herramientas' : 'Diferencia técnica'}</p></div>
+              <div class="flow-card"><strong>${isAnatomy ? 'loop()' : 'SBC'}</strong><p>${isAnatomy ? 'Repetir instrucciones' : 'Microprocesador<br>(Cerebro de Computadora)'}</p></div>
+            </div>
+          </div>
+        `;
+      }
+
+      /* FIX: Eliminada la clase .arduino-visual para evitar superposiciones no deseadas de los pseudo-elementos */
+      if (type === "board_cards") {
+        return `
+          <div class="visual-board">
+            <div style="width: min(340px, 100%); aspect-ratio: 1.35; border-radius: var(--radius); background: var(--soft); border: 2px dashed var(--line); display: grid; place-items: center; text-align: center; color: var(--text); padding: 20px; position: relative;">
+              <span style="font-size: 3rem; margin-bottom: 10px;">🔌</span>
+              <strong>Hardware Especializado</strong>
+              <span style="font-size: 0.85rem; margin-top: 8px;">Cada placa resuelve un problema distinto en la ingeniería.</span>
+            </div>
+          </div>
+        `;
+      }
+
+      if (type === "transition") {
+        return `
+          <div class="visual-board">
+            <div style="width: min(340px, 100%); aspect-ratio: 1.35; border-radius: var(--radius); background: var(--dark); color: white; display: grid; place-items: center; position: relative;">
+              <div style="text-align: center; font-size: 1.5rem; font-weight: 900; letter-spacing: 2px;">
+                ESP32 <span style="color: var(--teal); margin-left:8px;">IoT</span>
+              </div>
             </div>
           </div>
         `;
@@ -2878,25 +3075,14 @@
         return renderLedDemo();
       }
 
-      if (type === "sensors") {
+      if (type === "sensors" || type === "brain") {
+        const isSens = type === "sensors";
         return `
           <div class="visual-board">
             <div class="flow-grid" style="width:100%">
-              <div class="flow-card"><strong>Sensor</strong><p>Detecta luz, distancia o interacción.</p></div>
-              <div class="flow-card"><strong>Código</strong><p>Compara datos y decide.</p></div>
-              <div class="flow-card"><strong>Motor</strong><p>Convierte la orden en movimiento.</p></div>
-            </div>
-          </div>
-        `;
-      }
-
-      if (type === "brain") {
-        return `
-          <div class="brain-map">
-            <div class="flow-grid" style="width:100%">
-              <div class="flow-card"><strong>Entrada</strong><p>Sensor lee el mundo.</p></div>
-              <div class="flow-card"><strong>Proceso</strong><p>Arduino ejecuta el programa.</p></div>
-              <div class="flow-card"><strong>Salida</strong><p>LED, motor o pantalla responde.</p></div>
+              <div class="flow-card"><strong>${isSens ? 'Sensor' : 'Entrada'}</strong><p>${isSens ? 'Detecta luz, distancia o interacción.' : 'Sensor lee el mundo.'}</p></div>
+              <div class="flow-card"><strong>${isSens ? 'Código' : 'Proceso'}</strong><p>${isSens ? 'Compara datos y decide.' : 'Arduino ejecuta el programa.'}</p></div>
+              <div class="flow-card"><strong>${isSens ? 'Motor' : 'Salida'}</strong><p>${isSens ? 'Convierte la orden en movimiento.' : 'LED, motor o pantalla responde.'}</p></div>
             </div>
           </div>
         `;
@@ -2939,34 +3125,6 @@
       }
 
       return `<div class="visual-board"><div class="arduino-visual"></div></div>`;
-    }
-
-    function renderCode(mode) {
-      if (mode === "human") {
-        return escapeHTML(`Guardar el pin 13 con el nombre led
-
-Al iniciar:
-  preparar led para enviar energia
-
-Repetir siempre:
-  encender led
-  esperar 1 segundo
-  apagar led
-  esperar 1 segundo`);
-      }
-
-      return `<span class="keyword">int</span> led = <span class="value">13</span>; <span class="comment">// Pin del LED</span>
-
-<span class="keyword">void</span> <span class="fn">setup</span>() {
-  <span class="fn">pinMode</span>(led, OUTPUT);
-}
-
-<span class="keyword">void</span> <span class="fn">loop</span>() {
-  <span class="fn">digitalWrite</span>(led, HIGH);
-  <span class="fn">delay</span>(<span class="value">1000</span>);
-  <span class="fn">digitalWrite</span>(led, LOW);
-  <span class="fn">delay</span>(<span class="value">1000</span>);
-}`;
     }
 
     function renderBlinkMini() {
@@ -3046,6 +3204,7 @@ Repetir siempre:
       let content = "";
       if (mod.lab.type === "blink") content = renderBlinkLab(mod);
       else if (mod.lab.type === "interactive_button") content = renderInteractiveButtonLab(mod);
+      else if (mod.lab.type === "scenario") content = renderScenarioLab(mod);
       else content = renderSequenceLab(mod);
 
       stage.innerHTML = `
@@ -3059,6 +3218,37 @@ Repetir siempre:
             ${content}
           </div>
         </article>
+      `;
+    }
+
+    function renderScenarioLab(mod) {
+      const done = state.boardLabDone;
+      if (done) markLab(mod);
+      return `
+        <div class="blink-lab" style="gap:20px;">
+          <div class="mini-card" style="text-align:left; border-left: 4px solid var(--accent);">
+            <h3>Misión de Selección</h3>
+            <p>Tu equipo quiere construir una estación meteorológica que envíe la temperatura a una página web a través de Wi-Fi. ¿Qué controlador eliges?</p>
+          </div>
+          <div class="comparison-grid" style="width:100%;">
+            <button class="rule-card" data-action="pickBoard" data-correct="false">
+              <span class="rule-symbol">🔵</span><h3>Arduino UNO</h3><p>Clásico, pero sin Wi-Fi de fábrica.</p>
+            </button>
+            <button class="rule-card" data-action="pickBoard" data-correct="true" style="${done ? 'border-color:var(--green); background:var(--green-soft);' : ''}">
+              <span class="rule-symbol">🌐</span><h3>ESP32</h3><p>Wi-Fi integrado y ultra potente.</p>
+            </button>
+            <button class="rule-card" data-action="pickBoard" data-correct="false">
+              <span class="rule-symbol">📐</span><h3>Micro:bit</h3><p>Excelente para educación visual y Bluetooth, pero no ideal para servidores.</p>
+            </button>
+            <button class="rule-card" data-action="pickBoard" data-correct="false">
+              <span class="rule-symbol">🍓</span><h3>Raspberry Pi</h3><p>Es una computadora, demasiado costosa para solo enviar un número.</p>
+            </button>
+          </div>
+          <div class="lab-status">${done ? "¡Excelente elección! El ESP32 es el rey del IoT para estos casos." : "Selecciona la tarjeta correcta para avanzar."}</div>
+          <div class="lab-controls">
+            <button class="primary-btn" data-action="home">Volver al tablero</button>
+          </div>
+        </div>
       `;
     }
 
@@ -3352,6 +3542,12 @@ Repetir siempre:
       if (!target) return;
       const action = target.dataset.action;
 
+      if (action === "enterApp") {
+      document.getElementById("splashScreen").classList.add("is-hidden");
+      // Agrega esta línea para despertar a Boxxy
+      document.querySelector(".boxxy-container").style.display = "block";
+    }
+
       if (action === "home") renderHome();
       if (action === "enterApp") {
         document.getElementById("splashScreen").classList.add("is-hidden");
@@ -3400,10 +3596,20 @@ Repetir siempre:
         state.puzzle = [];
         renderLab();
       }
+      if (action === "pickBoard") {
+        if (target.dataset.correct === "true") {
+          state.boardLabDone = true;
+          renderLab();
+        } else {
+          target.style.borderColor = "var(--coral)";
+          target.style.background = "var(--coral-soft)";
+        }
+      }
       if (action === "resetProgress") {
         localStorage.removeItem(STORAGE_KEY);
         state.progress = {};
         state.puzzle = [];
+        state.boardLabDone = false;
         clearBlinkTimer();
         renderHome();
       }
@@ -3443,25 +3649,39 @@ Repetir siempre:
           "Esto es muy importante",
           "Que no se te olvide",
           "Presta atención a este concepto",
-          "Esto es fundamental"
+          "Esto es fundamental",
+          "Recuerda esto para el quiz",
+          "¡Esto te ayudará a construir mejor!",
+          "Fíjate bien en este detalle"
         ],
         lab: [
           "Dale, pruébalo",
           "Hazlo sin miedo",
           "¡Vamos, tú puedes!",
-          "Experimenta y aprende"
+          "Experimenta y aprende",
+          "Observa qué pasa y corrige",
+          "En electrónica, equivocarse es parte del proceso"
         ],
         quiz_correct: [
           "Que bien",
           "Excelente",
           "Lo entendiste bien",
+          "¡Muy bien! 👏",
+          "¡Correcto! Sigue así",
+          "¡Perfecto! Estás dominando esto",
+          "¡Genial! Vamos por la siguiente",
+          "¡Eso es! Lo tienes claro",
           "¡Muy bien! 👏"
         ],
         quiz_wrong: [
           "Nogh!",
           "Oye, eso estaba en la clase",
           "Lo olvidaste?",
-          "Repasemos eso"
+          "Repasemos eso",
+          "¡Casi! Revisa la clase y vuelve a intentarlo",
+          "No te preocupes, revisa la clase y vuelve a intentarlo",
+          "¡Ups! Revisa la clase y vuelve a intentarlo",
+          "¡No te rindas! Revisa la clase y vuelve a intentarlo"
         ]
       },
       messageTimeout: null,
@@ -3487,7 +3707,6 @@ Repetir siempre:
       }, duration);
     }
 
-    // CORRECCIÓN APLICADA: Función de movimiento reactivada
     function moveBoxxy() {
       const boxxy = document.getElementById("boxxy");
       if (!boxxy) return;
@@ -3553,7 +3772,6 @@ Repetir siempre:
             updateBoxxyEyes("neutral");
           }, 1500);
           
-          // CORRECCIÓN APLICADA: Llama a la función correcta de confeti
           if (state.view === "quiz") spawnConfetti();
         } else {
           updateBoxxyEyes("sad");
@@ -3568,7 +3786,6 @@ Repetir siempre:
       showBoxxySpeech(message, 2500);
     }
 
-// Cerebro de IA: Conexión con Ollama
     async function askBoxxyAI(question) {
       try {
         const response = await fetch("http://localhost:11434/api/generate", {
@@ -3590,9 +3807,8 @@ Repetir siempre:
         return data.response;
         
       } catch (error) {
-        console.error("Boxxy AI Error:", error); // Revisa la consola con F12 si vuelve a fallar
+        console.error("Boxxy AI Error:", error);
         
-        // Fallback: Si Ollama no responde, usa el sistema preprogramado mejorado
         const context = {
           view: state.view,
           module: MODULES[state.moduleIndex]?.title || "inicio",
@@ -3610,12 +3826,11 @@ Repetir siempre:
                         .replace(/[\u0300-\u036f]/g, "")
                         .replace(/[¿?¡!.,]/g, "");
       
-      // Diccionario 
       const keywords = {
         "hola": "¡Hola! Soy Boxxy. ¿En qué parte del circuito o del código te puedo ayudar hoy?",
         "quien eres": "Soy Boxxy, el asistente inteligente de MacroBot Lab. ¡Estoy aquí para ayudarte a construir cosas geniales!",
         "protoboard": "La protoboard es una tabla llena de agujeritos conectada por dentro. Sirve para armar y probar circuitos sin tener que soldar los cables.",
-        "arduino": "Arduino es como el cerebro de nuestro robot. Le conectamos sensores para que sienta, y le damos código para que piense y actúe.",
+        "arduino": "Arduino es como el cerebro de nuestro robot. Le conectamos sensores para que sienta, y le damos código para que pensé y actúe.",
         "robot": "¡Un robot es una máquina que armaremos juntos! Necesitará un cerebro (Arduino), energía, y código para saber qué hacer.",
         "setup": "En Arduino, setup() prepara la placa una sola vez al iniciar. Aquí le decimos quién es entrada y quién es salida usando pinMode().",
         "loop": "loop() es el corazón de tu código. Todo lo que escribas dentro de esas llaves se repetirá infinitamente.",
@@ -3635,7 +3850,6 @@ Repetir siempre:
         }
       }
       
-      // Respuestas genéricas por pantalla
       if (context.view === "lesson") {
         return `Buena pregunta sobre el módulo de ${context.module}. Fíjate en la sección "Idea clave" en pantalla. ¿Tienes dudas con algún comando específico?`;
       } else if (context.view === "lab") {
@@ -3677,23 +3891,34 @@ Repetir siempre:
         mouth.setAttribute("d", "M 42 66 Q 50 60 58 66");
         leftPupil.setAttribute("fill", "#ff6b6b");
         rightPupil.setAttribute("fill", "#ff6b6b");
-      } else if (state === "alert") {
-        mouth.setAttribute("d", "M 42 62 Q 50 68 58 62");
+      } else if (state === "worried") {
+        mouth.setAttribute("d", "M 42 66 Q 50 60 58 66"); // Curva invertida para boca triste/preocupada
         leftPupil.setAttribute("fill", "#ffa500");
         rightPupil.setAttribute("fill", "#ffa500");
       } else {
-        mouth.setAttribute("d", "M 42 62 Q 50 68 58 62");
-        leftPupil.setAttribute("fill", "#142033");
-        rightPupil.setAttribute("fill", "#142033");
+          mouth.setAttribute("d", "M 42 62 Q 50 68 58 62");
+          leftPupil.setAttribute("fill", "#142033");
+          rightPupil.setAttribute("fill", "#142033");
       }
       boxxyState2.eyeState = state;
     }
-
-    function trackMouseMovement() {
+function trackMouseMovement() {
       document.addEventListener("mousemove", (e) => {
         boxxyState2.mouseX = e.clientX;
         boxxyState2.mouseY = e.clientY;
         boxxyState2.lastInteraction = Date.now();
+        
+        // --- NUEVO: Volver a la normalidad al detectar movimiento ---
+        if (boxxyState2.eyeState === "worried") {
+          updateBoxxyEyes("neutral");
+          
+          // Opcional: Oculta el mensaje de preocupación inmediatamente para limpiar la pantalla
+          const speechBubble = document.getElementById("boxxySpeech");
+          if (speechBubble) {
+            speechBubble.classList.remove("is-visible");
+          }
+        }
+        // -----------------------------------------------------------
         
         const boxxyElement = document.getElementById("boxxy");
         if (!boxxyElement) return;
@@ -3736,20 +3961,32 @@ Repetir siempre:
       boxxyState2.blinkTimer = setTimeout(performBlink, 3000);
     }
 
-    function inactivityDetection() {
+function inactivityDetection() {
       const checkInactivity = () => {
         const now = Date.now();
         const timeSinceInteraction = now - boxxyState2.lastInteraction;
         
-        if (timeSinceInteraction > 300000) { 
-          if (boxxyState2.eyeState !== "alert") {
-            updateBoxxyEyes("alert");
-            showBoxxySpeech("¿Necesitas ayuda? Escríbeme si tienes dudas", 4000);
+        
+        if (timeSinceInteraction > 30000) { 
+          if (boxxyState2.eyeState !== "worried") {
+            updateBoxxyEyes("worried");
+            
+            // Mensajes aleatorios de preocupación
+            const mensajes = [
+              "¿Estás bien?",
+              "¿Necesitas ayuda con algo?",
+              "Me preocupas, ¿todo en orden?",
+              "¿Te perdiste en el código?"
+            ];
+            const mensajeElegido = mensajes[Math.floor(Math.random() * mensajes.length)];
+            
+            showBoxxySpeech(mensajeElegido, 4000);
           }
         }
       };
       
-      boxxyState2.inactivityTimer = setInterval(checkInactivity, 30000);
+      // Revisa cada 10 segundos
+      boxxyState2.inactivityTimer = setInterval(checkInactivity, 10000);
     }
 
     function saveConversation(question, answer) {
@@ -3767,7 +4004,6 @@ Repetir siempre:
       localStorage.setItem('boxxyHistory', JSON.stringify(history));
     }
 
-    // Event listeners para Boxxy
     const boxxyElement = document.getElementById("boxxy");
     const boxxyChatDialog = document.getElementById("boxxyChatDialog");
     const boxxyCloseBtn = document.getElementById("boxxyCloseBtn");
@@ -3828,12 +4064,10 @@ Repetir siempre:
       });
     }
 
-    // Inicializar sistemas de Boxxy 2.0
     trackMouseMovement();
     automaticBlink();
     inactivityDetection();
 
-    // CORRECCIÓN APLICADA: Se vuelve a activar el movimiento general
     setInterval(() => {
       moveBoxxy();
     }, 50);
@@ -3863,10 +4097,9 @@ Repetir siempre:
       originalAnswerQuestion.call(this, index);
     };
 
-    // Eventos Globales
     document.addEventListener("click", handleClick);
     document.addEventListener("input", handleInput);
-     
+      
     document.addEventListener("pointerdown", handleBtnPress);
     document.addEventListener("pointerup", handleBtnRelease);
     document.addEventListener("pointerleave", handleBtnRelease);
